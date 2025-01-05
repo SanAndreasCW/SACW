@@ -1,14 +1,12 @@
 package main
 
 import (
-	"github.com/kodeyeen/omp"
+	_ "github.com/LosantosGW/go_LSGW/mod/auth"
+	_ "github.com/LosantosGW/go_LSGW/mod/database"
+	_ "github.com/joho/godotenv"
 )
 
 func init() {
-	omp.Events.Listen(omp.EventTypePlayerConnect, func(e *omp.PlayerConnectEvent) bool {
-		e.Player.SendClientMessage("Hello, world!", 0xFFFF00FF)
-		return true
-	})
 }
 
 func main() {

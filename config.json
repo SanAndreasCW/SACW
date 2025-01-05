@@ -96,9 +96,7 @@
     "pawn": {
         "legacy_plugins": [
         ],
-        "main_scripts": [
-            "LSGW 1"
-        ],
+        "main_scripts": [],
         "side_scripts": []
     },
     "rcon": {

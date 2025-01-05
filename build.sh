@@ -1,0 +1,1 @@
+GOARCH=386 CGO_ENABLED=1 go build -buildmode=c-shared -o gamemodes/LSGW.so
