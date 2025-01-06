@@ -7,4 +7,3 @@ sql:
       go:
         package: "database"
         out: "mod/database"
-        sql_package: "pgx/v5"

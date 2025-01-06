@@ -14,7 +14,7 @@ DELETE FROM player WHERE id = $1
 `
 
 func (q *Queries) DeletePlayer(ctx context.Context, id int32) error {
-	_, err := q.db.Exec(ctx, deletePlayer, id)
+	_, err := q.db.ExecContext(ctx, deletePlayer, id)
 	return err
 }
 
@@ -23,7 +23,7 @@ SELECT id, username, password, money, level, exp, gold, token, hour, minute, sec
 `
 
 func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
-	row := q.db.QueryRow(ctx, getPlayerByID, id)
+	row := q.db.QueryRowContext(ctx, getPlayerByID, id)
 	var i Player
 	err := row.Scan(
 		&i.ID,
@@ -60,7 +60,7 @@ SELECT id, username, password, money, level, exp, gold, token, hour, minute, sec
 `
 
 func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Player, error) {
-	row := q.db.QueryRow(ctx, getPlayerByUsername, username)
+	row := q.db.QueryRowContext(ctx, getPlayerByUsername, username)
 	var i Player
 	err := row.Scan(
 		&i.ID,
@@ -102,7 +102,7 @@ type InsertPlayerParams struct {
 }
 
 func (q *Queries) InsertPlayer(ctx context.Context, arg InsertPlayerParams) (Player, error) {
-	row := q.db.QueryRow(ctx, insertPlayer, arg.Username, arg.Password)
+	row := q.db.QueryRowContext(ctx, insertPlayer, arg.Username, arg.Password)
 	var i Player
 	err := row.Scan(
 		&i.ID,
@@ -139,7 +139,7 @@ UPDATE player SET last_login = CURRENT_TIMESTAMP WHERE id = $1
 `
 
 func (q *Queries) UpdateLastLogin(ctx context.Context, id int32) error {
-	_, err := q.db.Exec(ctx, updateLastLogin, id)
+	_, err := q.db.ExecContext(ctx, updateLastLogin, id)
 	return err
 }
 
@@ -148,7 +148,7 @@ UPDATE player SET last_played = CURRENT_TIMESTAMP WHERE id = $1
 `
 
 func (q *Queries) UpdateLastPlayed(ctx context.Context, id int32) error {
-	_, err := q.db.Exec(ctx, updateLastPlayed, id)
+	_, err := q.db.ExecContext(ctx, updateLastPlayed, id)
 	return err
 }
 
@@ -185,7 +185,7 @@ type UpdatePlayerParams struct {
 }
 
 func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Player, error) {
-	row := q.db.QueryRow(ctx, updatePlayer,
+	row := q.db.QueryRowContext(ctx, updatePlayer,
 		arg.ID,
 		arg.Username,
 		arg.Password,

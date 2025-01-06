@@ -5,7 +5,7 @@
 package database
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 type Ban struct {
@@ -13,42 +13,42 @@ type Ban struct {
 	AdminID  int32
 	Username string
 	Ip       string
-	Reason   pgtype.Text
-	BannedAt pgtype.Timestamp
-	ExpireAt pgtype.Timestamp
+	Reason   sql.NullString
+	BannedAt sql.NullTime
+	ExpireAt sql.NullTime
 }
 
 type Guild struct {
 	ID          int32
 	Name        string
 	Tag         string
-	LeaderID    pgtype.Int4
-	Testimonial pgtype.Text
+	LeaderID    sql.NullInt32
+	Testimonial sql.NullString
 	Level       int32
 	Exp         int32
 	Points      int32
 	Favors      int32
 	IsActive    bool
 	Color       int32
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
+	CreatedAt   sql.NullTime
+	UpdatedAt   sql.NullTime
 }
 
 type GuildBase struct {
 	ID       int32
-	GuildID  pgtype.Int4
+	GuildID  sql.NullInt32
 	Name     string
 	MinX     float32
 	MinY     float32
 	MaxX     float32
 	MaxY     float32
-	ExpireAt pgtype.Timestamp
+	ExpireAt sql.NullTime
 }
 
 type GuildCapturableZone struct {
 	ID      int32
 	Name    string
-	GuildID pgtype.Int4
+	GuildID sql.NullInt32
 	MinX    float32
 	MinY    float32
 	MaxX    float32
@@ -99,10 +99,10 @@ type Player struct {
 	PosZ       float32
 	PosAngle   float32
 	Language   int32
-	LastLogin  pgtype.Timestamp
-	LastPlayed pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
+	LastLogin  sql.NullTime
+	LastPlayed sql.NullTime
+	CreatedAt  sql.NullTime
+	UpdatedAt  sql.NullTime
 }
 
 type Profit struct {
@@ -116,7 +116,7 @@ type Profit struct {
 type ProfitableZone struct {
 	ID       int32
 	Name     string
-	ProfitID pgtype.Int4
+	ProfitID sql.NullInt32
 	MinX     float32
 	MinY     float32
 	MaxX     float32

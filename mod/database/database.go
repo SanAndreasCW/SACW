@@ -1,18 +1,21 @@
 package database
 
 import (
-	"context"
+	"database/sql"
+	_ "database/sql/driver"
+
+	_ "github.com/lib/pq"
 
 	"github.com/LosantosGW/go_LSGW/mod/logger"
 	"github.com/RahRow/omp"
-	"github.com/jackc/pgx/v5"
 )
 
-var DB *pgx.Conn
+var DB *sql.DB
 
 func init() {
 	omp.Events.Listen(omp.EventTypeGameModeInit, func(e *omp.GameModeInitEvent) bool {
-		DB, err := pgx.Connect(context.Background(), "user=postgres password=dev host=localhost port=5432 dbname=lsgw")
+		var err error = nil
+		DB, err = sql.Open("postgres", "user=postgres password=dev host=localhost port=5432 dbname=lsgw sslmode=disable")
 
 		if err != nil {
 			logger.Error("Failed to connect to database: %s", err)
@@ -20,7 +23,7 @@ func init() {
 			return true
 		}
 
-		if err := DB.Ping(context.Background()); err != nil {
+		if err := DB.Ping(); err != nil {
 			logger.Error("Failed to ping database: %s", err)
 			omp.SendRCONCommand("exit")
 			return true
@@ -31,7 +34,7 @@ func init() {
 	})
 
 	omp.Events.Listen(omp.EventTypeGameModeExit, func(event *omp.GameModeExitEvent) bool {
-		DB.Close(context.Background())
+		DB.Close()
 		return true
 	})
 }
