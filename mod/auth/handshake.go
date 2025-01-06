@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	Players      = make(map[int]*types.PlayerI, setting.MaxPlayers)
+	PlayersI     = make(map[int]*types.PlayerI, setting.MaxPlayers)
 	PlayersCache = make(map[int]*types.PlayerCache, setting.MaxPlayers)
 )
 
@@ -71,7 +71,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				Player:     player,
 				StoreModel: &user,
 			}
-			Players[playerI.ID()] = playerI
+			PlayersI[playerI.ID()] = playerI
 			player.SendClientMessage("Registration successful. Welcome to the server!", 1)
 			player.Spawn()
 			return true
@@ -105,7 +105,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				Player:     player,
 				StoreModel: &user,
 			}
-			Players[playerI.ID()] = playerI
+			PlayersI[playerI.ID()] = playerI
 			player.SendClientMessage("Login successful. Welcome back!", 1)
 			player.Spawn()
 			return true
@@ -115,7 +115,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 }
 
 func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
-	player := Players[e.Player.ID()]
+	player := PlayersI[e.Player.ID()]
 	ctx := context.Background()
 	playerPosition := player.Position()
 	player.StoreModel.PosX = playerPosition.X
@@ -146,7 +146,7 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 		PosAngle: player.StoreModel.PosAngle,
 		Language: player.StoreModel.Language,
 	})
-	delete(Players, e.Player.ID())
+	delete(PlayersI, e.Player.ID())
 	if err != nil {
 		logger.Fatal("[Player:%s] Error updating player: %v", e.Player.Name(), err)
 		return true
@@ -160,7 +160,7 @@ func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
 }
 
 func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
-	player := Players[e.Player.ID()]
+	player := PlayersI[e.Player.ID()]
 	player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
 	player.SetFacingAngle(player.StoreModel.PosAngle)
 	return true

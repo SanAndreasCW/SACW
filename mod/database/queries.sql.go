@@ -7,10 +7,24 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
 
+const deleteGuildByID = `-- name: DeleteGuildByID :exec
+DELETE
+FROM guild
+WHERE id = $1
+`
+
+func (q *Queries) DeleteGuildByID(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteGuildByID, id)
+	return err
+}
+
 const deletePlayer = `-- name: DeletePlayer :exec
-DELETE FROM player WHERE id = $1
+DELETE
+FROM player
+WHERE id = $1
 `
 
 func (q *Queries) DeletePlayer(ctx context.Context, id int32) error {
@@ -18,8 +32,106 @@ func (q *Queries) DeletePlayer(ctx context.Context, id int32) error {
 	return err
 }
 
+const getGuildByID = `-- name: GetGuildByID :one
+SELECT id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
+FROM guild
+WHERE id = $1
+`
+
+func (q *Queries) GetGuildByID(ctx context.Context, id int32) (Guild, error) {
+	row := q.db.QueryRowContext(ctx, getGuildByID, id)
+	var i Guild
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tag,
+		&i.LeaderID,
+		&i.Testimonial,
+		&i.Level,
+		&i.Exp,
+		&i.Points,
+		&i.Favors,
+		&i.IsActive,
+		&i.Color,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getGuildByTag = `-- name: GetGuildByTag :one
+SELECT id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
+FROM guild
+where tag = $1
+`
+
+func (q *Queries) GetGuildByTag(ctx context.Context, tag string) (Guild, error) {
+	row := q.db.QueryRowContext(ctx, getGuildByTag, tag)
+	var i Guild
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tag,
+		&i.LeaderID,
+		&i.Testimonial,
+		&i.Level,
+		&i.Exp,
+		&i.Points,
+		&i.Favors,
+		&i.IsActive,
+		&i.Color,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getGuilds = `-- name: GetGuilds :many
+SELECT id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
+FROM guild
+`
+
+func (q *Queries) GetGuilds(ctx context.Context) ([]Guild, error) {
+	rows, err := q.db.QueryContext(ctx, getGuilds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Guild
+	for rows.Next() {
+		var i Guild
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Tag,
+			&i.LeaderID,
+			&i.Testimonial,
+			&i.Level,
+			&i.Exp,
+			&i.Points,
+			&i.Favors,
+			&i.IsActive,
+			&i.Color,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPlayerByID = `-- name: GetPlayerByID :one
-SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at FROM player WHERE id = $1
+SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+FROM player
+WHERE id = $1
 `
 
 func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
@@ -56,7 +168,9 @@ func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
 }
 
 const getPlayerByUsername = `-- name: GetPlayerByUsername :one
-SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at FROM player WHERE username = $1
+SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+FROM player
+WHERE username = $1
 `
 
 func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Player, error) {
@@ -92,8 +206,51 @@ func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Pla
 	return i, err
 }
 
+const insertGuild = `-- name: InsertGuild :one
+INSERT INTO guild (name, tag, leader_id, testimonial, color)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
+`
+
+type InsertGuildParams struct {
+	Name        string
+	Tag         string
+	LeaderID    sql.NullInt32
+	Testimonial sql.NullString
+	Color       int32
+}
+
+func (q *Queries) InsertGuild(ctx context.Context, arg InsertGuildParams) (Guild, error) {
+	row := q.db.QueryRowContext(ctx, insertGuild,
+		arg.Name,
+		arg.Tag,
+		arg.LeaderID,
+		arg.Testimonial,
+		arg.Color,
+	)
+	var i Guild
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tag,
+		&i.LeaderID,
+		&i.Testimonial,
+		&i.Level,
+		&i.Exp,
+		&i.Points,
+		&i.Favors,
+		&i.IsActive,
+		&i.Color,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const insertPlayer = `-- name: InsertPlayer :one
-INSERT INTO player (username, password) VALUES ($1, $2) RETURNING id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+INSERT INTO player (username, password)
+VALUES ($1, $2)
+RETURNING id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 `
 
 type InsertPlayerParams struct {
@@ -134,8 +291,68 @@ func (q *Queries) InsertPlayer(ctx context.Context, arg InsertPlayerParams) (Pla
 	return i, err
 }
 
+const updateGuild = `-- name: UpdateGuild :one
+UPDATE guild
+SET testimonial = $1,
+    color       = $2,
+    level       = $3,
+    exp         = $4,
+    points      = $5,
+    favors      = $6,
+    is_active   = $7,
+    leader_id   = $8,
+    updated_at  = CURRENT_TIMESTAMP
+WHERE id = $9
+RETURNING id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
+`
+
+type UpdateGuildParams struct {
+	Testimonial sql.NullString
+	Color       int32
+	Level       int32
+	Exp         int32
+	Points      int32
+	Favors      int32
+	IsActive    bool
+	LeaderID    sql.NullInt32
+	ID          int32
+}
+
+func (q *Queries) UpdateGuild(ctx context.Context, arg UpdateGuildParams) (Guild, error) {
+	row := q.db.QueryRowContext(ctx, updateGuild,
+		arg.Testimonial,
+		arg.Color,
+		arg.Level,
+		arg.Exp,
+		arg.Points,
+		arg.Favors,
+		arg.IsActive,
+		arg.LeaderID,
+		arg.ID,
+	)
+	var i Guild
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tag,
+		&i.LeaderID,
+		&i.Testimonial,
+		&i.Level,
+		&i.Exp,
+		&i.Points,
+		&i.Favors,
+		&i.IsActive,
+		&i.Color,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateLastLogin = `-- name: UpdateLastLogin :exec
-UPDATE player SET last_login = CURRENT_TIMESTAMP WHERE id = $1
+UPDATE player
+SET last_login = CURRENT_TIMESTAMP
+WHERE id = $1
 `
 
 func (q *Queries) UpdateLastLogin(ctx context.Context, id int32) error {
@@ -144,7 +361,9 @@ func (q *Queries) UpdateLastLogin(ctx context.Context, id int32) error {
 }
 
 const updateLastPlayed = `-- name: UpdateLastPlayed :exec
-UPDATE player SET last_played = CURRENT_TIMESTAMP WHERE id = $1
+UPDATE player
+SET last_played = CURRENT_TIMESTAMP
+WHERE id = $1
 `
 
 func (q *Queries) UpdateLastPlayed(ctx context.Context, id int32) error {
@@ -153,11 +372,30 @@ func (q *Queries) UpdateLastPlayed(ctx context.Context, id int32) error {
 }
 
 const updatePlayer = `-- name: UpdatePlayer :one
-UPDATE player 
-SET username = $2, password = $3, money = $4, level = $5, exp = $6, gold = $7, token = $8, hour = $9,
-    minute = $10, second = $11, vip = $12, helper = $13, is_online = $14, kills = $15, deaths = $16,
-    pos_x = $17, pos_y = $18, pos_z = $19, pos_angle = $20, language = $21, updated_at = CURRENT_TIMESTAMP
-WHERE id = $1 RETURNING id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+UPDATE player
+SET username   = $2,
+    password   = $3,
+    money      = $4,
+    level      = $5,
+    exp        = $6,
+    gold       = $7,
+    token      = $8,
+    hour       = $9,
+    minute     = $10,
+    second     = $11,
+    vip        = $12,
+    helper     = $13,
+    is_online  = $14,
+    kills      = $15,
+    deaths     = $16,
+    pos_x      = $17,
+    pos_y      = $18,
+    pos_z      = $19,
+    pos_angle  = $20,
+    language   = $21,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1
+RETURNING id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 `
 
 type UpdatePlayerParams struct {
