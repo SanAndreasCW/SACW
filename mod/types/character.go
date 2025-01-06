@@ -7,7 +7,7 @@ import (
 
 type PlayerI struct {
 	*omp.Player
-	StoreModel database.Player
+	StoreModel *database.Player
 }
 
 type PlayerCache struct {

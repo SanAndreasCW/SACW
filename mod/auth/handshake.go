@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"github.com/LosantosGW/go_LSGW/mod/setting"
 	"time"
 
 	"github.com/LosantosGW/go_LSGW/mod/database"
@@ -12,8 +13,8 @@ import (
 )
 
 var (
-	Players      = make(map[int]*types.PlayerI, 200)
-	PlayersCache = make(map[int]*types.PlayerCache, 200)
+	Players      = make(map[int]*types.PlayerI, setting.MaxPlayers)
+	PlayersCache = make(map[int]*types.PlayerCache, setting.MaxPlayers)
 )
 
 func onGameModeInit(_ *omp.GameModeInitEvent) bool {
@@ -68,7 +69,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 
 			playerI := &types.PlayerI{
 				Player:     player,
-				StoreModel: user,
+				StoreModel: &user,
 			}
 			Players[playerI.ID()] = playerI
 			player.SendClientMessage("Registration successful. Welcome to the server!", 1)
@@ -102,7 +103,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 			}
 			playerI := &types.PlayerI{
 				Player:     player,
-				StoreModel: user,
+				StoreModel: &user,
 			}
 			Players[playerI.ID()] = playerI
 			player.SendClientMessage("Login successful. Welcome back!", 1)
@@ -139,10 +140,10 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 		IsOnline: false,
 		Kills:    player.StoreModel.Kills,
 		Deaths:   player.StoreModel.Deaths,
-		PosX:     playerPosition.X,
-		PosY:     playerPosition.Y,
-		PosZ:     playerPosition.Z,
-		PosAngle: player.FacingAngle(),
+		PosX:     player.StoreModel.PosX,
+		PosY:     player.StoreModel.PosY,
+		PosZ:     player.StoreModel.PosZ,
+		PosAngle: player.StoreModel.PosAngle,
 		Language: player.StoreModel.Language,
 	})
 	delete(Players, e.Player.ID())
@@ -160,7 +161,8 @@ func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
 
 func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 	player := Players[e.Player.ID()]
-	e.Player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
+	player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
+	player.SetFacingAngle(player.StoreModel.PosAngle)
 	return true
 }
 
