@@ -11,15 +11,13 @@ import (
 	"github.com/matthewhartstonge/argon2"
 )
 
-const DefaultSalt = "go_LSGW"
-
 var (
 	Players      = make(map[int]*types.PlayerI, 200)
 	PlayersCache = make(map[int]*types.PlayerCache, 200)
 )
 
-func onGameModeInit(e *omp.GameModeInitEvent) bool {
-	omp.NewClass(255, 12, omp.Vector3{X: 0.0, Y: 0.0, Z: 0.0}, 0.0, 0, 0, 0, 0, 0, 0)
+func onGameModeInit(_ *omp.GameModeInitEvent) bool {
+	_, _ = omp.NewClass(255, 12, omp.Vector3{X: 0.0, Y: 0.0, Z: 0.0}, 0.0, 0, 0, 0, 0, 0, 0)
 	return true
 }
 
@@ -124,7 +122,7 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 	player.StoreModel.PosZ = playerPosition.Z
 	player.StoreModel.PosAngle = player.FacingAngle()
 	q := database.New(database.DB)
-	q.UpdatePlayer(ctx, database.UpdatePlayerParams{
+	_, err := q.UpdatePlayer(ctx, database.UpdatePlayerParams{
 		ID:       player.StoreModel.ID,
 		Username: player.Name(),
 		Password: player.StoreModel.Password,
@@ -148,6 +146,10 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 		Language: player.StoreModel.Language,
 	})
 	delete(Players, e.Player.ID())
+	if err != nil {
+		logger.Fatal("[Player:%s] Error updating player: %v", e.Player.Name(), err)
+		return true
+	}
 	return true
 }
 
@@ -158,7 +160,7 @@ func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
 
 func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 	player := Players[e.Player.ID()]
-	e.Player.SetPosition(omp.Vector3{X: float32(player.StoreModel.PosX), Y: float32(player.StoreModel.PosY), Z: float32(player.StoreModel.PosZ)})
+	e.Player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
 	return true
 }
 

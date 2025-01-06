@@ -34,7 +34,11 @@ func init() {
 	})
 
 	omp.Events.Listen(omp.EventTypeGameModeExit, func(event *omp.GameModeExitEvent) bool {
-		DB.Close()
+		err := DB.Close()
+
+		if err != nil {
+			logger.Error("Failed to close database connection: %s", err)
+		}
 		return true
 	})
 }
