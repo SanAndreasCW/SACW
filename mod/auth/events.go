@@ -5,6 +5,10 @@ import (
 	"github.com/kodeyeen/event"
 )
 
+var (
+	Events = event.NewDispatcher()
+)
+
 const (
 	EventTypeOnAuthSuccess event.Type = "onAuthSuccess"
 )

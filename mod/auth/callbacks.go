@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"github.com/LosantosGW/go_LSGW/mod/setting"
 	"github.com/kodeyeen/event"
 	"time"
 
@@ -11,12 +10,6 @@ import (
 	"github.com/LosantosGW/go_LSGW/mod/types"
 	"github.com/RahRow/omp"
 	"github.com/matthewhartstonge/argon2"
-)
-
-var (
-	Events       = event.NewDispatcher()
-	PlayersI     = make(map[int]*types.PlayerI, setting.MaxPlayers)
-	PlayersCache = make(map[int]*types.PlayerCache, setting.MaxPlayers)
 )
 
 func onGameModeInit(_ *omp.GameModeInitEvent) bool {
@@ -174,13 +167,4 @@ func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 	player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
 	player.SetFacingAngle(player.StoreModel.PosAngle)
 	return true
-}
-
-func init() {
-	omp.Events.Listen(omp.EventTypeGameModeInit, onGameModeInit)
-	omp.Events.Listen(omp.EventTypePlayerSpawn, onPlayerSpawn)
-	omp.Events.Listen(omp.EventTypePlayerRequestClass, onPlayerRequestClass)
-	omp.Events.Listen(omp.EventTypePlayerConnect, onPlayerConnect)
-	omp.Events.Listen(omp.EventTypePlayerDisconnect, onPlayerDisconnect)
-	logger.Info("Handshake Module Initialized")
 }

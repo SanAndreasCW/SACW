@@ -1,10 +1,6 @@
 package setting
 
 const (
-	MaxPlayers = 200
-	MaxGuilds  = 40
-)
-
-const (
-	GuildCreationPrice = 2000
+	MaxPlayers   = 200
+	MaxCompanies = 100
 )
