@@ -10,7 +10,7 @@ import (
 
 type Ban struct {
 	ID       int32
-	AdminID  int32
+	AdminID  sql.NullInt32
 	Username string
 	Ip       string
 	Reason   sql.NullString
@@ -18,63 +18,41 @@ type Ban struct {
 	ExpireAt sql.NullTime
 }
 
-type Guild struct {
+type Company struct {
 	ID          int32
 	Name        string
 	Tag         string
-	LeaderID    sql.NullInt32
-	Testimonial sql.NullString
-	Level       int32
-	Exp         int32
-	Points      int32
-	Favors      int32
-	IsActive    bool
-	Color       int32
-	CreatedAt   sql.NullTime
-	UpdatedAt   sql.NullTime
+	Description sql.NullString
+	Balance     sql.NullInt32
+	Multiplier  sql.NullFloat64
 }
 
-type GuildBase struct {
-	ID       int32
-	GuildID  sql.NullInt32
-	Name     string
-	MinX     float32
-	MinY     float32
-	MaxX     float32
-	MaxY     float32
-	ExpireAt sql.NullTime
-}
-
-type GuildCapturableZone struct {
-	ID      int32
-	Name    string
-	GuildID sql.NullInt32
-	MinX    float32
-	MinY    float32
-	MaxX    float32
-	MaxY    float32
-}
-
-type GuildMember struct {
-	ID       int32
-	GuildID  int32
-	PlayerID int32
-	Role     int32
-	Hour     int32
-	Minute   int32
-	Second   int32
-}
-
-type GuildPerk struct {
-	ID      int32
-	GuildID int32
-	PerkID  int32
-}
-
-type Perk struct {
+type CompanyApplication struct {
 	ID          int32
-	Name        string
-	Description string
+	PlayerID    int32
+	CompanyID   int32
+	Description sql.NullString
+	Accepted    sql.NullBool
+	CreatedAt   sql.NullTime
+	AnsweredAt  sql.NullTime
+}
+
+type CompanyMember struct {
+	ID        int32
+	PlayerID  int32
+	CompanyID int32
+	Role      int16
+}
+
+type CompanyMemberInfo struct {
+	ID        int32
+	PlayerID  int32
+	CompanyID int32
+	Hour      int32
+	Minute    int16
+	Second    int16
+	Score     int32
+	Level     int32
 }
 
 type Player struct {
@@ -103,24 +81,6 @@ type Player struct {
 	LastPlayed sql.NullTime
 	CreatedAt  sql.NullTime
 	UpdatedAt  sql.NullTime
-}
-
-type Profit struct {
-	ID          int32
-	Name        string
-	Description string
-	Amount      int32
-	ProfitType  int32
-}
-
-type ProfitableZone struct {
-	ID       int32
-	Name     string
-	ProfitID sql.NullInt32
-	MinX     float32
-	MinY     float32
-	MaxX     float32
-	MaxY     float32
 }
 
 type Skin struct {

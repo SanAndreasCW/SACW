@@ -10,14 +10,16 @@ import (
 	"database/sql"
 )
 
-const deleteGuildByID = `-- name: DeleteGuildByID :exec
-DELETE
-FROM guild
-WHERE id = $1
+const acceptCompanyApplication = `-- name: AcceptCompanyApplication :exec
+UPDATE company_application
+SET accepted    = true,
+    answered_at = CURRENT_TIMESTAMP
+WHERE player_id = $1
+  AND accepted = false
 `
 
-func (q *Queries) DeleteGuildByID(ctx context.Context, id int32) error {
-	_, err := q.db.ExecContext(ctx, deleteGuildByID, id)
+func (q *Queries) AcceptCompanyApplication(ctx context.Context, playerID int32) error {
+	_, err := q.db.ExecContext(ctx, acceptCompanyApplication, playerID)
 	return err
 }
 
@@ -32,88 +34,178 @@ func (q *Queries) DeletePlayer(ctx context.Context, id int32) error {
 	return err
 }
 
-const getGuildByID = `-- name: GetGuildByID :one
-SELECT id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
-FROM guild
-WHERE id = $1
+const getCompanies = `-- name: GetCompanies :many
+SELECT id, name, tag, description, balance, multiplier
+FROM company
 `
 
-func (q *Queries) GetGuildByID(ctx context.Context, id int32) (Guild, error) {
-	row := q.db.QueryRowContext(ctx, getGuildByID, id)
-	var i Guild
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Tag,
-		&i.LeaderID,
-		&i.Testimonial,
-		&i.Level,
-		&i.Exp,
-		&i.Points,
-		&i.Favors,
-		&i.IsActive,
-		&i.Color,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getGuildByTag = `-- name: GetGuildByTag :one
-SELECT id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
-FROM guild
-where tag = $1
-`
-
-func (q *Queries) GetGuildByTag(ctx context.Context, tag string) (Guild, error) {
-	row := q.db.QueryRowContext(ctx, getGuildByTag, tag)
-	var i Guild
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Tag,
-		&i.LeaderID,
-		&i.Testimonial,
-		&i.Level,
-		&i.Exp,
-		&i.Points,
-		&i.Favors,
-		&i.IsActive,
-		&i.Color,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getGuilds = `-- name: GetGuilds :many
-SELECT id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
-FROM guild
-`
-
-func (q *Queries) GetGuilds(ctx context.Context) ([]Guild, error) {
-	rows, err := q.db.QueryContext(ctx, getGuilds)
+func (q *Queries) GetCompanies(ctx context.Context) ([]Company, error) {
+	rows, err := q.db.QueryContext(ctx, getCompanies)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Guild
+	var items []Company
 	for rows.Next() {
-		var i Guild
+		var i Company
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Tag,
-			&i.LeaderID,
-			&i.Testimonial,
-			&i.Level,
-			&i.Exp,
-			&i.Points,
-			&i.Favors,
-			&i.IsActive,
-			&i.Color,
+			&i.Description,
+			&i.Balance,
+			&i.Multiplier,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCompanyApplications = `-- name: GetCompanyApplications :many
+SELECT id, player_id, company_id, description, accepted, created_at, answered_at
+FROM company_application
+WHERE company_id = $1
+`
+
+func (q *Queries) GetCompanyApplications(ctx context.Context, companyID int32) ([]CompanyApplication, error) {
+	rows, err := q.db.QueryContext(ctx, getCompanyApplications, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompanyApplication
+	for rows.Next() {
+		var i CompanyApplication
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlayerID,
+			&i.CompanyID,
+			&i.Description,
+			&i.Accepted,
 			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.AnsweredAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCompanyByID = `-- name: GetCompanyByID :one
+SELECT id, name, tag, description, balance, multiplier
+FROM company
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetCompanyByID(ctx context.Context, id int32) (Company, error) {
+	row := q.db.QueryRowContext(ctx, getCompanyByID, id)
+	var i Company
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tag,
+		&i.Description,
+		&i.Balance,
+		&i.Multiplier,
+	)
+	return i, err
+}
+
+const getCompanyByTag = `-- name: GetCompanyByTag :one
+SELECT id, name, tag, description, balance, multiplier
+FROM company
+WHERE tag = $1
+LIMIT 1
+`
+
+func (q *Queries) GetCompanyByTag(ctx context.Context, tag string) (Company, error) {
+	row := q.db.QueryRowContext(ctx, getCompanyByTag, tag)
+	var i Company
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tag,
+		&i.Description,
+		&i.Balance,
+		&i.Multiplier,
+	)
+	return i, err
+}
+
+const getCompanyMembers = `-- name: GetCompanyMembers :many
+SELECT id, player_id, company_id, role
+FROM company_member
+WHERE company_id = $1
+`
+
+func (q *Queries) GetCompanyMembers(ctx context.Context, companyID int32) ([]CompanyMember, error) {
+	rows, err := q.db.QueryContext(ctx, getCompanyMembers, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompanyMember
+	for rows.Next() {
+		var i CompanyMember
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlayerID,
+			&i.CompanyID,
+			&i.Role,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCompanyMembersInfo = `-- name: GetCompanyMembersInfo :many
+SELECT id, player_id, company_id, hour, minute, second, score, level
+FROM company_member_info
+WHERE company_id = $1
+`
+
+func (q *Queries) GetCompanyMembersInfo(ctx context.Context, companyID int32) ([]CompanyMemberInfo, error) {
+	rows, err := q.db.QueryContext(ctx, getCompanyMembersInfo, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompanyMemberInfo
+	for rows.Next() {
+		var i CompanyMemberInfo
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlayerID,
+			&i.CompanyID,
+			&i.Hour,
+			&i.Minute,
+			&i.Second,
+			&i.Score,
+			&i.Level,
 		); err != nil {
 			return nil, err
 		}
@@ -132,6 +224,7 @@ const getPlayerByID = `-- name: GetPlayerByID :one
 SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 FROM player
 WHERE id = $1
+LIMIT 1
 `
 
 func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
@@ -171,6 +264,7 @@ const getPlayerByUsername = `-- name: GetPlayerByUsername :one
 SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 FROM player
 WHERE username = $1
+LIMIT 1
 `
 
 func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Player, error) {
@@ -206,43 +300,88 @@ func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Pla
 	return i, err
 }
 
-const insertGuild = `-- name: InsertGuild :one
-INSERT INTO guild (name, tag, leader_id, testimonial, color)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
+const getUserActiveCompany = `-- name: GetUserActiveCompany :one
+SELECT company.id, company.name, company.tag, company.description, company.balance, company.multiplier
+FROM company
+         JOIN company_member ON (company.id = company_member.company_id)
+WHERE company_member.player_id = $1
+LIMIT 1
 `
 
-type InsertGuildParams struct {
-	Name        string
-	Tag         string
-	LeaderID    sql.NullInt32
-	Testimonial sql.NullString
-	Color       int32
-}
-
-func (q *Queries) InsertGuild(ctx context.Context, arg InsertGuildParams) (Guild, error) {
-	row := q.db.QueryRowContext(ctx, insertGuild,
-		arg.Name,
-		arg.Tag,
-		arg.LeaderID,
-		arg.Testimonial,
-		arg.Color,
-	)
-	var i Guild
+func (q *Queries) GetUserActiveCompany(ctx context.Context, playerID int32) (Company, error) {
+	row := q.db.QueryRowContext(ctx, getUserActiveCompany, playerID)
+	var i Company
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Tag,
-		&i.LeaderID,
-		&i.Testimonial,
-		&i.Level,
-		&i.Exp,
-		&i.Points,
-		&i.Favors,
-		&i.IsActive,
-		&i.Color,
+		&i.Description,
+		&i.Balance,
+		&i.Multiplier,
+	)
+	return i, err
+}
+
+const getUserCompaniesInfo = `-- name: GetUserCompaniesInfo :many
+SELECT company.id, company.name, company.tag, company.description, company.balance, company.multiplier
+FROM company
+         JOIN company_member_info ON (company.id = company_member_info.company_id)
+WHERE company_member_info.player_id = $1
+`
+
+func (q *Queries) GetUserCompaniesInfo(ctx context.Context, playerID int32) ([]Company, error) {
+	rows, err := q.db.QueryContext(ctx, getUserCompaniesInfo, playerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Company
+	for rows.Next() {
+		var i Company
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Tag,
+			&i.Description,
+			&i.Balance,
+			&i.Multiplier,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertCompanyApplication = `-- name: InsertCompanyApplication :one
+INSERT INTO company_application (player_id, company_id, description)
+VALUES ($1, $2, $3)
+RETURNING id, player_id, company_id, description, accepted, created_at, answered_at
+`
+
+type InsertCompanyApplicationParams struct {
+	PlayerID    int32
+	CompanyID   int32
+	Description sql.NullString
+}
+
+func (q *Queries) InsertCompanyApplication(ctx context.Context, arg InsertCompanyApplicationParams) (CompanyApplication, error) {
+	row := q.db.QueryRowContext(ctx, insertCompanyApplication, arg.PlayerID, arg.CompanyID, arg.Description)
+	var i CompanyApplication
+	err := row.Scan(
+		&i.ID,
+		&i.PlayerID,
+		&i.CompanyID,
+		&i.Description,
+		&i.Accepted,
 		&i.CreatedAt,
-		&i.UpdatedAt,
+		&i.AnsweredAt,
 	)
 	return i, err
 }
@@ -285,64 +424,6 @@ func (q *Queries) InsertPlayer(ctx context.Context, arg InsertPlayerParams) (Pla
 		&i.Language,
 		&i.LastLogin,
 		&i.LastPlayed,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const updateGuild = `-- name: UpdateGuild :one
-UPDATE guild
-SET testimonial = $1,
-    color       = $2,
-    level       = $3,
-    exp         = $4,
-    points      = $5,
-    favors      = $6,
-    is_active   = $7,
-    leader_id   = $8,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE id = $9
-RETURNING id, name, tag, leader_id, testimonial, level, exp, points, favors, is_active, color, created_at, updated_at
-`
-
-type UpdateGuildParams struct {
-	Testimonial sql.NullString
-	Color       int32
-	Level       int32
-	Exp         int32
-	Points      int32
-	Favors      int32
-	IsActive    bool
-	LeaderID    sql.NullInt32
-	ID          int32
-}
-
-func (q *Queries) UpdateGuild(ctx context.Context, arg UpdateGuildParams) (Guild, error) {
-	row := q.db.QueryRowContext(ctx, updateGuild,
-		arg.Testimonial,
-		arg.Color,
-		arg.Level,
-		arg.Exp,
-		arg.Points,
-		arg.Favors,
-		arg.IsActive,
-		arg.LeaderID,
-		arg.ID,
-	)
-	var i Guild
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Tag,
-		&i.LeaderID,
-		&i.Testimonial,
-		&i.Level,
-		&i.Exp,
-		&i.Points,
-		&i.Favors,
-		&i.IsActive,
-		&i.Color,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

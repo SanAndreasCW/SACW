@@ -1,12 +1,14 @@
 -- name: GetPlayerByUsername :one
 SELECT *
 FROM player
-WHERE username = $1;
+WHERE username = $1
+LIMIT 1;
 
 -- name: GetPlayerByID :one
 SELECT *
 FROM player
-WHERE id = $1;
+WHERE id = $1
+LIMIT 1;
 
 -- name: UpdatePlayer :one
 UPDATE player
@@ -54,40 +56,58 @@ UPDATE player
 SET last_played = CURRENT_TIMESTAMP
 WHERE id = $1;
 
--- name: GetGuilds :many
-SELECT *
-FROM guild;
+-- name: GetUserActiveCompany :one
+SELECT company.*
+FROM company
+         JOIN company_member ON (company.id = company_member.company_id)
+WHERE company_member.player_id = $1
+LIMIT 1;
 
--- name: GetGuildByID :one
-SELECT *
-FROM guild
-WHERE id = $1;
+-- name: GetUserCompaniesInfo :many
+SELECT company.*
+FROM company
+         JOIN company_member_info ON (company.id = company_member_info.company_id)
+WHERE company_member_info.player_id = $1;
 
--- name: GetGuildByTag :one
+-- name: GetCompanies :many
 SELECT *
-FROM guild
-where tag = $1;
+FROM company;
 
--- name: InsertGuild :one
-INSERT INTO guild (name, tag, leader_id, testimonial, color)
-VALUES ($1, $2, $3, $4, $5)
+-- name: GetCompanyByID :one
+SELECT *
+FROM company
+WHERE id = $1
+LIMIT 1;
+
+-- name: GetCompanyByTag :one
+SELECT *
+FROM company
+WHERE tag = $1
+LIMIT 1;
+
+-- name: GetCompanyMembers :many
+SELECT *
+FROM company_member
+WHERE company_id = $1;
+
+-- name: GetCompanyMembersInfo :many
+SELECT *
+FROM company_member_info
+WHERE company_id = $1;
+
+-- name: GetCompanyApplications :many
+SELECT *
+FROM company_application
+WHERE company_id = $1;
+
+-- name: AcceptCompanyApplication :exec
+UPDATE company_application
+SET accepted    = true,
+    answered_at = CURRENT_TIMESTAMP
+WHERE player_id = $1
+  AND accepted = false;
+
+-- name: InsertCompanyApplication :one
+INSERT INTO company_application (player_id, company_id, description)
+VALUES ($1, $2, $3)
 RETURNING *;
-
--- name: UpdateGuild :one
-UPDATE guild
-SET testimonial = $1,
-    color       = $2,
-    level       = $3,
-    exp         = $4,
-    points      = $5,
-    favors      = $6,
-    is_active   = $7,
-    leader_id   = $8,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE id = $9
-RETURNING *;
-
--- name: DeleteGuildByID :exec
-DELETE
-FROM guild
-WHERE id = $1;
