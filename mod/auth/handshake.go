@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"github.com/LosantosGW/go_LSGW/mod/setting"
+	"github.com/kodeyeen/event"
 	"time"
 
 	"github.com/LosantosGW/go_LSGW/mod/database"
@@ -13,6 +14,7 @@ import (
 )
 
 var (
+	Events       = event.NewDispatcher()
 	PlayersI     = make(map[int]*types.PlayerI, setting.MaxPlayers)
 	PlayersCache = make(map[int]*types.PlayerCache, setting.MaxPlayers)
 )
@@ -72,6 +74,10 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				StoreModel: &user,
 			}
 			PlayersI[playerI.ID()] = playerI
+			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
+				PlayerI: playerI,
+				Success: true,
+			})
 			player.SendClientMessage("Registration successful. Welcome to the server!", 1)
 			player.Spawn()
 			return true
@@ -106,6 +112,10 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				StoreModel: &user,
 			}
 			PlayersI[playerI.ID()] = playerI
+			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
+				PlayerI: playerI,
+				Success: true,
+			})
 			player.SendClientMessage("Login successful. Welcome back!", 1)
 			player.Spawn()
 			return true
