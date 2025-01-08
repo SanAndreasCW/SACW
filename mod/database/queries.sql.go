@@ -75,6 +75,44 @@ func (q *Queries) GetCompanies(ctx context.Context) ([]Company, error) {
 	return items, nil
 }
 
+const getCompaniesApplications = `-- name: GetCompaniesApplications :many
+SELECT id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
+FROM company_application
+WHERE expired_at <= CURRENT_TIMESTAMP
+`
+
+func (q *Queries) GetCompaniesApplications(ctx context.Context) ([]CompanyApplication, error) {
+	rows, err := q.db.QueryContext(ctx, getCompaniesApplications)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompanyApplication
+	for rows.Next() {
+		var i CompanyApplication
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlayerID,
+			&i.CompanyID,
+			&i.Description,
+			&i.Accepted,
+			&i.CreatedAt,
+			&i.ExpiredAt,
+			&i.AnsweredAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCompanyApplications = `-- name: GetCompanyApplications :many
 SELECT id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
 FROM company_application

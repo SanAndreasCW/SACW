@@ -101,6 +101,11 @@ FROM company_application
 WHERE company_id = $1
   AND expired_at <= CURRENT_TIMESTAMP;
 
+-- name: GetCompaniesApplications :many
+SELECT *
+FROM company_application
+WHERE expired_at <= CURRENT_TIMESTAMP;
+
 -- name: AcceptCompanyApplication :exec
 UPDATE company_application
 SET accepted    = true,
