@@ -2,7 +2,7 @@ package timer
 
 import "time"
 
-func setTimer(timer *Timer) chan bool {
+func SetTimer(timer *Timer) chan bool {
 	interval := time.Duration(timer.TickRate) * time.Millisecond
 	ticker := time.NewTicker(interval)
 	clearTimer := make(chan bool)
