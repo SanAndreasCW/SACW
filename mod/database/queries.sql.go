@@ -15,11 +15,17 @@ UPDATE company_application
 SET accepted    = true,
     answered_at = CURRENT_TIMESTAMP
 WHERE player_id = $1
+  AND company_id = $2
   AND accepted = false
 `
 
-func (q *Queries) AcceptCompanyApplication(ctx context.Context, playerID int32) error {
-	_, err := q.db.ExecContext(ctx, acceptCompanyApplication, playerID)
+type AcceptCompanyApplicationParams struct {
+	PlayerID  int32
+	CompanyID int32
+}
+
+func (q *Queries) AcceptCompanyApplication(ctx context.Context, arg AcceptCompanyApplicationParams) error {
+	_, err := q.db.ExecContext(ctx, acceptCompanyApplication, arg.PlayerID, arg.CompanyID)
 	return err
 }
 
@@ -70,9 +76,10 @@ func (q *Queries) GetCompanies(ctx context.Context) ([]Company, error) {
 }
 
 const getCompanyApplications = `-- name: GetCompanyApplications :many
-SELECT id, player_id, company_id, description, accepted, created_at, answered_at
+SELECT id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
 FROM company_application
 WHERE company_id = $1
+  AND expired_at <= CURRENT_TIMESTAMP
 `
 
 func (q *Queries) GetCompanyApplications(ctx context.Context, companyID int32) ([]CompanyApplication, error) {
@@ -91,6 +98,7 @@ func (q *Queries) GetCompanyApplications(ctx context.Context, companyID int32) (
 			&i.Description,
 			&i.Accepted,
 			&i.CreatedAt,
+			&i.ExpiredAt,
 			&i.AnsweredAt,
 		); err != nil {
 			return nil, err
@@ -362,7 +370,7 @@ func (q *Queries) GetUserCompaniesInfo(ctx context.Context, playerID int32) ([]C
 const insertCompanyApplication = `-- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)
 VALUES ($1, $2, $3)
-RETURNING id, player_id, company_id, description, accepted, created_at, answered_at
+RETURNING id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
 `
 
 type InsertCompanyApplicationParams struct {
@@ -381,6 +389,7 @@ func (q *Queries) InsertCompanyApplication(ctx context.Context, arg InsertCompan
 		&i.Description,
 		&i.Accepted,
 		&i.CreatedAt,
+		&i.ExpiredAt,
 		&i.AnsweredAt,
 	)
 	return i, err

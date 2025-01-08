@@ -3,9 +3,10 @@ package company
 import (
 	"context"
 	"database/sql"
-	"github.com/LosantosGW/go_LSGW/mod/auth"
-	"github.com/LosantosGW/go_LSGW/mod/database"
+	"fmt"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/auth"
+	"github.com/SanAndreasCW/SACW/mod/database"
 )
 
 func companyCommand(cmd *omp.Command) {
@@ -24,15 +25,24 @@ func companyCommand(cmd *omp.Command) {
 					if company.StoreModel.Tag == tag {
 						ctx := context.Background()
 						q := database.New(database.DB)
+						dialogBody := fmt.Sprintf(
+							"Enter company application request description for %s company.",
+							company.StoreModel.Name,
+						)
 						dialog := omp.NewInputDialog(
 							"Company Application",
-							"Enter company application request description.",
+							dialogBody,
 							"Send",
 							"Close",
 						)
 
 						dialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
 							if e.Response == omp.DialogResponseRight {
+								return true
+							}
+							if len(e.InputText) > 80 {
+								dialog.Body = fmt.Sprintf("%s\nDescription can't be larger than 80 characters.", dialogBody)
+								dialog.ShowFor(player)
 								return true
 							}
 							selectedCompany, _ := q.GetCompanyByTag(ctx, tag)

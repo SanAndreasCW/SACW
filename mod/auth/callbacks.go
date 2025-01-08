@@ -5,10 +5,10 @@ import (
 	"github.com/kodeyeen/event"
 	"time"
 
-	"github.com/LosantosGW/go_LSGW/mod/database"
-	"github.com/LosantosGW/go_LSGW/mod/logger"
-	"github.com/LosantosGW/go_LSGW/mod/types"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/SanAndreasCW/SACW/mod/types"
 	"github.com/matthewhartstonge/argon2"
 )
 

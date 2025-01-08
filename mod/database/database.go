@@ -6,8 +6,8 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/LosantosGW/go_LSGW/mod/logger"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/logger"
 )
 
 var DB *sql.DB

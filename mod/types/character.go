@@ -1,8 +1,8 @@
 package types
 
 import (
-	"github.com/LosantosGW/go_LSGW/mod/database"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/database"
 )
 
 type PlayerI struct {

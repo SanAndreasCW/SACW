@@ -1,8 +1,8 @@
 package company
 
 import (
-	"github.com/LosantosGW/go_LSGW/mod/setting"
-	"github.com/LosantosGW/go_LSGW/mod/types"
+	"github.com/SanAndreasCW/SACW/mod/setting"
+	"github.com/SanAndreasCW/SACW/mod/types"
 )
 
 var (

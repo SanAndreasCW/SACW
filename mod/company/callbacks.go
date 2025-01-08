@@ -2,11 +2,11 @@ package company
 
 import (
 	"context"
-	"github.com/LosantosGW/go_LSGW/mod/auth"
-	"github.com/LosantosGW/go_LSGW/mod/database"
-	"github.com/LosantosGW/go_LSGW/mod/logger"
-	"github.com/LosantosGW/go_LSGW/mod/types"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/auth"
+	"github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/SanAndreasCW/SACW/mod/types"
 )
 
 func onAuthSuccess(e *auth.OnAuthSuccessEvent) {

@@ -1,8 +1,8 @@
 package main
 
 import (
-	_ "github.com/LosantosGW/go_LSGW/mod/company"
-	_ "github.com/LosantosGW/go_LSGW/mod/database"
+	_ "github.com/SanAndreasCW/SACW/mod/company"
+	_ "github.com/SanAndreasCW/SACW/mod/database"
 	_ "github.com/joho/godotenv"
 )
 

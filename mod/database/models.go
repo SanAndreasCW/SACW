@@ -34,6 +34,7 @@ type CompanyApplication struct {
 	Description sql.NullString
 	Accepted    sql.NullBool
 	CreatedAt   sql.NullTime
+	ExpiredAt   sql.NullTime
 	AnsweredAt  sql.NullTime
 }
 

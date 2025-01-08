@@ -1,8 +1,8 @@
 package company
 
 import (
-	"github.com/LosantosGW/go_LSGW/mod/auth"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/auth"
 )
 
 func init() {

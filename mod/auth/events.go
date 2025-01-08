@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/LosantosGW/go_LSGW/mod/types"
+	"github.com/SanAndreasCW/SACW/mod/types"
 	"github.com/kodeyeen/event"
 )
 
