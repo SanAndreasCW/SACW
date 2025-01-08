@@ -5,5 +5,12 @@ import (
 )
 
 type CompanyI struct {
-	StoreModel *database.Company
+	StoreModel   *database.Company
+	Applications []*database.CompanyApplication
+	Members      []*PlayerI
+}
+
+type UserCompanyI struct {
+	*CompanyI
+	Valid bool
 }

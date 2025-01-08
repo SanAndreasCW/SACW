@@ -26,8 +26,8 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		return true
 	}
 
-	for index, company := range companies {
-		Companies[index] = &types.CompanyI{
+	for _, company := range companies {
+		Companies[company.ID] = &types.CompanyI{
 			StoreModel: &company,
 		}
 	}

@@ -8,6 +8,7 @@ import (
 type PlayerI struct {
 	*omp.Player
 	StoreModel *database.Player
+	Company    *CompanyI
 }
 
 type PlayerCache struct {
