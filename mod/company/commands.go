@@ -18,18 +18,19 @@ func companyCommand(cmd *omp.Command) {
 				companyApplicationAction(playerI, &tag)
 				return
 			}
+		case "history":
+			companyHistoryAction(playerI)
+			return
 		}
 		playerI.SendClientMessage("[Command Guide]: /companies :optional[actions] :optional[data...]", 1)
 		return
 	}
-
 	if len(Companies) <= 0 {
 		msgDialog := omp.NewMessageDialog("Companies List", "No Companies Defined Yet!", "Ok", "Close")
 		msgDialog.ShowFor(playerI.Player)
 		return
 	}
 	companiesDialog := omp.NewTabListDialog("Companies List", "Ok", "Close")
-
 	for _, company := range Companies {
 		companiesDialog.Add(omp.TabListItem{
 			company.StoreModel.Name,

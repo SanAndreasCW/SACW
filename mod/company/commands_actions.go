@@ -61,3 +61,26 @@ func companyApplicationAction(playerI *types.PlayerI, tag *string) {
 
 	playerI.Player.SendClientMessage("[Company Application]: Company tag not found.", 1)
 }
+
+func companyHistoryAction(playerI *types.PlayerI) {
+	if len(playerI.Companies) <= 0 {
+		msgDialog := omp.NewMessageDialog(
+			"Companies History List",
+			"You don't have any company history.",
+			"Ok",
+			"",
+		)
+		msgDialog.ShowFor(playerI.Player)
+		return
+	}
+	companyHistory := omp.NewTabListDialog("Companies History List", "Select", "Close")
+	for _, company := range playerI.Companies {
+		companyI := Companies[company.StoreModel.ID]
+		companyHistory.Add(omp.TabListItem{
+			companyI.StoreModel.Name,
+			companyI.StoreModel.Tag,
+			string(rune(companyI.StoreModel.Multiplier.Float64)),
+		})
+	}
+	companyHistory.ShowFor(playerI.Player)
+}

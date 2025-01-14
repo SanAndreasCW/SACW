@@ -10,6 +10,7 @@ type PlayerI struct {
 	*omp.Player
 	StoreModel *database.Player
 	Company    *CompanyI
+	Companies  []*CompanyMemberInfoI
 }
 
 type PlayerCache struct {
@@ -31,4 +32,20 @@ func (p *PlayerI) GetCurrentCompany() *CompanyI {
 		}
 	}
 	return p.Company
+}
+
+func (p *PlayerI) GetPlayerCompanies() []*CompanyI {
+	ctx := context.Background()
+	q := database.New(database.DB)
+	companiesInfo, err := q.GetUserCompaniesInfo(ctx, p.StoreModel.ID)
+	if err != nil {
+		return nil
+	}
+	var companiesInfoI []*CompanyI
+	for _, companyInfo := range companiesInfo {
+		companiesInfoI = append(companiesInfoI, &CompanyI{
+			StoreModel: &companyInfo,
+		})
+	}
+	return companiesInfoI
 }

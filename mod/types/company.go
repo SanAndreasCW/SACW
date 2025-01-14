@@ -17,6 +17,10 @@ type CompanyI struct {
 	Members      []*PlayerI
 }
 
+type CompanyMemberInfoI struct {
+	StoreModel *database.CompanyMemberInfo
+}
+
 func (ci *CompanyI) ReloadApplications() {
 	ctx := context.Background()
 	q := database.New(database.DB)
