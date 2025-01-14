@@ -10,7 +10,6 @@ func companyCommand(cmd *omp.Command) {
 	if argsCount := len(cmd.Args); argsCount > 0 {
 		action, parameters := cmd.Args[0], cmd.Args[1:]
 		paramsLength := len(parameters)
-
 		switch action {
 		case "application":
 			if paramsLength >= 1 {

@@ -26,7 +26,6 @@ func (p *PlayerI) GetCurrentCompany() *CompanyI {
 		if err != nil {
 			return nil
 		}
-
 		p.Company = &CompanyI{
 			StoreModel: &company,
 		}

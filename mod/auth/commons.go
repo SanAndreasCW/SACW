@@ -28,7 +28,6 @@ func SplitMessage(input string, limit int) *[]string {
 
 func SendClientMessageToAll(message string, color omp.Color) {
 	messages := SplitMessage(message, 143)
-
 	go func() {
 		for _, player := range PlayersI {
 			for _, msg := range *messages {

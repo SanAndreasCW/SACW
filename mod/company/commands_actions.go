@@ -21,7 +21,6 @@ func companyApplicationAction(playerI *types.PlayerI, tag *string) {
 				"Send",
 				"Close",
 			)
-
 			dialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
 				if e.Response == omp.DialogResponseRight {
 					return true
@@ -31,7 +30,6 @@ func companyApplicationAction(playerI *types.PlayerI, tag *string) {
 					dialog.ShowFor(playerI.Player)
 					return true
 				}
-				// Insert Company Application
 				if len(company.Applications) >= setting.MaxCompanyApplications {
 					playerI.SendClientMessage(
 						"[Company Application]: Targeted company is not capable for more applications.",
@@ -58,7 +56,6 @@ func companyApplicationAction(playerI *types.PlayerI, tag *string) {
 			return
 		}
 	}
-
 	playerI.Player.SendClientMessage("[Company Application]: Company tag not found.", 1)
 }
 
