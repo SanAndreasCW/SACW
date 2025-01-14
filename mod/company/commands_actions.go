@@ -81,3 +81,30 @@ func companyHistoryAction(playerI *types.PlayerI) {
 	}
 	companyHistory.ShowFor(playerI.Player)
 }
+
+func companyApplicationsActions(playerI *types.PlayerI) {
+	company := playerI.GetCurrentCompany()
+	if company == nil {
+		playerI.SendClientMessage(
+			"[Company Applications]: You are not in a company to check incoming company applications",
+			1,
+		)
+		return
+	}
+	if len(company.Applications) <= 0 {
+		dialog := omp.NewMessageDialog(
+			"Company Applications",
+			"No applications found in the company which you are in",
+			"Select",
+			"Close",
+		)
+		dialog.ShowFor(playerI.Player)
+		return
+	}
+	companyApplications := omp.NewTabListDialog("Company Applications", "Select", "Close")
+	for _, companyApplication := range company.Applications {
+		companyApplications.Add(omp.TabListItem{
+			string(companyApplication.StoreModel.PlayerID),
+		})
+	}
+}

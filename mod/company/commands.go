@@ -20,6 +20,10 @@ func companyCommand(cmd *omp.Command) {
 		case "history":
 			companyHistoryAction(playerI)
 			return
+
+		case "applications":
+			companyApplicationsActions(playerI)
+			return
 		}
 		playerI.SendClientMessage("[Command Guide]: /companies :optional[actions] :optional[data...]", 1)
 		return
