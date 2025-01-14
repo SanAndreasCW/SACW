@@ -3,6 +3,7 @@ package company
 import (
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/auth"
+	"github.com/SanAndreasCW/SACW/mod/logger"
 )
 
 func init() {
@@ -14,4 +15,6 @@ func init() {
 
 	// Commands
 	omp.Commands.Add("companies", companyCommand)
+
+	logger.Info("Company module initialized")
 }

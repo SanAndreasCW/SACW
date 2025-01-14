@@ -15,7 +15,7 @@ var DB *sql.DB
 func init() {
 	omp.Events.Listen(omp.EventTypeGameModeInit, func(e *omp.GameModeInitEvent) bool {
 		var err error = nil
-		DB, err = sql.Open("postgres", "user=postgres password=dev host=localhost port=5432 dbname=lsgw sslmode=disable")
+		DB, err = sql.Open("postgres", "user=postgres password=dev host=localhost port=5432 dbname=sacw sslmode=disable")
 
 		if err != nil {
 			logger.Error("Failed to connect to database: %s", err)
