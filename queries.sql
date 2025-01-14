@@ -101,12 +101,17 @@ FROM company_application
 WHERE company_id = $1
   AND expired_at <= CURRENT_TIMESTAMP;
 
--- name: AcceptCompanyApplication :exec
+-- name: GetCompaniesApplications :many
+SELECT *
+FROM company_application
+WHERE expired_at <= CURRENT_TIMESTAMP;
+
+-- name: AnswerCompanyApplication :exec
 UPDATE company_application
-SET accepted    = true,
+SET accepted    = $1,
     answered_at = CURRENT_TIMESTAMP
-WHERE player_id = $1
-  AND company_id = $2
+WHERE player_id = $2
+  AND company_id = $3
   AND accepted = false;
 
 -- name: InsertCompanyApplication :one

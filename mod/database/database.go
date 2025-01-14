@@ -15,27 +15,22 @@ var DB *sql.DB
 func init() {
 	omp.Events.Listen(omp.EventTypeGameModeInit, func(e *omp.GameModeInitEvent) bool {
 		var err error = nil
-		DB, err = sql.Open("postgres", "user=postgres password=dev host=localhost port=5432 dbname=lsgw sslmode=disable")
-
+		DB, err = sql.Open("postgres", "user=postgres password=dev host=localhost port=5432 dbname=sacw sslmode=disable")
 		if err != nil {
 			logger.Error("Failed to connect to database: %s", err)
 			omp.SendRCONCommand("exit")
 			return true
 		}
-
 		if err := DB.Ping(); err != nil {
 			logger.Error("Failed to ping database: %s", err)
 			omp.SendRCONCommand("exit")
 			return true
 		}
-
 		logger.Info("Database module initialized")
 		return true
 	})
-
 	omp.Events.Listen(omp.EventTypeGameModeExit, func(event *omp.GameModeExitEvent) bool {
 		err := DB.Close()
-
 		if err != nil {
 			logger.Error("Failed to close database connection: %s", err)
 		}

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"github.com/kodeyeen/event"
 	"time"
 
@@ -23,45 +24,37 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 	playerCache := &types.PlayerCache{Player: player, LoginAttempts: 0}
 	PlayersCache[player.ID()] = playerCache
 	q := database.New(database.DB)
-
 	ctx := context.Background()
 	user, err := q.GetPlayerByUsername(ctx, player.Name())
 
 	if err != nil {
 		registerDialog := omp.NewInputDialog("Registration", "Please enter your password to register.", "Register", "Cancel")
 		registerDialog.ShowFor(player)
-
 		registerDialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
 			if e.Response == omp.DialogResponseRight {
 				player.Kick()
 				return true
 			}
-
 			if len(e.InputText) < 3 {
 				player.SendClientMessage("Password must be at least 3 characters long.", 1)
 				registerDialog.ShowFor(player)
 				return true
 			}
-
 			hashedPassword, err := argon.HashEncoded([]byte(e.InputText))
-
 			if err != nil {
 				logger.Fatal("[Player:%s] Error hashing password: %v", player.Name(), err)
 				player.Kick()
 				return true
 			}
-
 			user, err := q.InsertPlayer(ctx, database.InsertPlayerParams{
 				Username: player.Name(),
 				Password: string(hashedPassword),
 			})
-
 			if err != nil {
 				logger.Fatal("[Player:%s] Error creating user: %v", player.Name(), err)
 				player.Kick()
 				return true
 			}
-
 			playerI := &types.PlayerI{
 				Player:     player,
 				StoreModel: &user,
@@ -78,15 +71,12 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 	} else {
 		loginDialog := omp.NewPasswordDialog("Login", "Please enter your password to login.", "Login", "Cancel")
 		loginDialog.ShowFor(player)
-
 		loginDialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
 			if e.Response == omp.DialogResponseRight {
 				player.Kick()
 				return true
 			}
-
 			verified, _ := argon2.VerifyEncoded([]byte(e.InputText), []byte(user.Password))
-
 			if !verified {
 				player.SendClientMessage("Incorrect password. Please try again.", 1)
 				playerCache.LoginAttempts++
@@ -166,5 +156,11 @@ func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 	player := PlayersI[e.Player.ID()]
 	player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
 	player.SetFacingAngle(player.StoreModel.PosAngle)
+	return true
+}
+
+func onPlayerText(e *omp.PlayerTextEvent) bool {
+	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", e.Player.ID(), e.Player.Name(), e.Message)
+	SendClientMessageToAll(msg, 0xFFFFFFFF)
 	return true
 }

@@ -18,20 +18,17 @@ func onAuthSuccess(e *auth.OnAuthSuccessEvent) {
 func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 	ctx := context.Background()
 	q := database.New(database.DB)
-
 	companies, err := q.GetCompanies(ctx)
 
 	if err != nil {
 		logger.Fatal("[Company]: Failed to load companies: %v", err)
 		return true
 	}
-
-	for index, company := range companies {
-		Companies[index] = &types.CompanyI{
+	for _, company := range companies {
+		Companies[company.ID] = &types.CompanyI{
 			StoreModel: &company,
 		}
 	}
-
 	logger.Info("[Company]: Loaded %d companies", len(companies))
 	return true
 }

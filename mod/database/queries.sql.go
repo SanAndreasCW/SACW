@@ -10,22 +10,23 @@ import (
 	"database/sql"
 )
 
-const acceptCompanyApplication = `-- name: AcceptCompanyApplication :exec
+const answerCompanyApplication = `-- name: AnswerCompanyApplication :exec
 UPDATE company_application
-SET accepted    = true,
+SET accepted    = $1,
     answered_at = CURRENT_TIMESTAMP
-WHERE player_id = $1
-  AND company_id = $2
+WHERE player_id = $2
+  AND company_id = $3
   AND accepted = false
 `
 
-type AcceptCompanyApplicationParams struct {
+type AnswerCompanyApplicationParams struct {
+	Accepted  int16
 	PlayerID  int32
 	CompanyID int32
 }
 
-func (q *Queries) AcceptCompanyApplication(ctx context.Context, arg AcceptCompanyApplicationParams) error {
-	_, err := q.db.ExecContext(ctx, acceptCompanyApplication, arg.PlayerID, arg.CompanyID)
+func (q *Queries) AnswerCompanyApplication(ctx context.Context, arg AnswerCompanyApplicationParams) error {
+	_, err := q.db.ExecContext(ctx, answerCompanyApplication, arg.Accepted, arg.PlayerID, arg.CompanyID)
 	return err
 }
 
@@ -61,6 +62,44 @@ func (q *Queries) GetCompanies(ctx context.Context) ([]Company, error) {
 			&i.Description,
 			&i.Balance,
 			&i.Multiplier,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCompaniesApplications = `-- name: GetCompaniesApplications :many
+SELECT id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
+FROM company_application
+WHERE expired_at <= CURRENT_TIMESTAMP
+`
+
+func (q *Queries) GetCompaniesApplications(ctx context.Context) ([]CompanyApplication, error) {
+	rows, err := q.db.QueryContext(ctx, getCompaniesApplications)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompanyApplication
+	for rows.Next() {
+		var i CompanyApplication
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlayerID,
+			&i.CompanyID,
+			&i.Description,
+			&i.Accepted,
+			&i.CreatedAt,
+			&i.ExpiredAt,
+			&i.AnsweredAt,
 		); err != nil {
 			return nil, err
 		}

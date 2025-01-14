@@ -6,5 +6,5 @@ import (
 )
 
 var (
-	Companies = make(map[int]*types.CompanyI, setting.MaxCompanies)
+	Companies = make(map[int32]*types.CompanyI, setting.MaxCompanies)
 )
