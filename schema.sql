@@ -89,9 +89,9 @@ CREATE TABLE IF NOT EXISTS company_application
     player_id   INT         NOT NULL,
     company_id  INT         NOT NULL,
     description VARCHAR(80) NULL,
-    accepted    BOOLEAN   DEFAULT false,
+    accepted    int2      DEFAULT 0 NOT NULL,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expired_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '1' DAY,
+    expired_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '1' DAY,
     answered_at TIMESTAMP   NULL,
     FOREIGN KEY (player_id) REFERENCES player (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE

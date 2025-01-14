@@ -32,7 +32,7 @@ type CompanyApplication struct {
 	PlayerID    int32
 	CompanyID   int32
 	Description sql.NullString
-	Accepted    sql.NullBool
+	Accepted    int16
 	CreatedAt   sql.NullTime
 	ExpiredAt   sql.NullTime
 	AnsweredAt  sql.NullTime

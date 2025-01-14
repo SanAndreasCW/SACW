@@ -15,3 +15,8 @@ const (
 	StockAnalyst
 	Manager
 )
+const (
+	OnProgress = iota
+	Accepted
+	Rejected
+)

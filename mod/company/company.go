@@ -16,5 +16,6 @@ func init() {
 	// Commands
 	omp.Commands.Add("companies", companyCommand)
 
+	// Module Announcement
 	logger.Info("Company module initialized")
 }
