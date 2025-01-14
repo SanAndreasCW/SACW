@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"github.com/kodeyeen/event"
 	"time"
 
@@ -166,5 +167,11 @@ func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 	player := PlayersI[e.Player.ID()]
 	player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
 	player.SetFacingAngle(player.StoreModel.PosAngle)
+	return true
+}
+
+func onPlayerText(e *omp.PlayerTextEvent) bool {
+	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", e.Player.ID(), e.Player.Name(), e.Message)
+	SendClientMessageToAll(msg, 0xFFFFFFFF)
 	return true
 }

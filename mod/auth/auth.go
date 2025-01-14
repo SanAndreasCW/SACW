@@ -12,6 +12,7 @@ func init() {
 	omp.Events.Listen(omp.EventTypePlayerRequestClass, onPlayerRequestClass)
 	omp.Events.Listen(omp.EventTypePlayerConnect, onPlayerConnect)
 	omp.Events.Listen(omp.EventTypePlayerDisconnect, onPlayerDisconnect)
+	omp.Events.Listen(omp.EventTypePlayerText, onPlayerText)
 
 	// Application Initiation Complete
 	logger.Info("Auth Module Initialized")
