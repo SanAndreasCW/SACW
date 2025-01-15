@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/SanAndreasCW/SACW/mod/types"
+	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/kodeyeen/event"
 )
 
@@ -14,6 +14,6 @@ const (
 )
 
 type OnAuthSuccessEvent struct {
-	PlayerI *types.PlayerI
+	PlayerI *commons.PlayerI
 	Success bool
 }

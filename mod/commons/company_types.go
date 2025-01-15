@@ -1,4 +1,4 @@
-package types
+package commons
 
 import (
 	"context"
@@ -8,7 +8,8 @@ import (
 )
 
 type CompanyApplicationI struct {
-	StoreModel *database.CompanyApplication
+	StoreModel  *database.CompanyApplication
+	PlayerModel *database.Player
 }
 
 type CompanyI struct {
@@ -31,7 +32,8 @@ func (ci *CompanyI) ReloadApplications() {
 	ci.Applications = nil
 	for _, application := range applications {
 		ci.Applications = append(ci.Applications, &CompanyApplicationI{
-			StoreModel: &application,
+			StoreModel:  &application.CompanyApplication,
+			PlayerModel: &application.Player,
 		})
 	}
 }

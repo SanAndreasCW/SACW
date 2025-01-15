@@ -1,4 +1,4 @@
-package company
+package commons
 
 const (
 	Trainee = iota

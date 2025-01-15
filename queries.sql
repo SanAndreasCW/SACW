@@ -96,10 +96,11 @@ FROM company_member_info
 WHERE company_id = $1;
 
 -- name: GetCompanyApplications :many
-SELECT *
+SELECT sqlc.embed(company_application), sqlc.embed(player)
 FROM company_application
+         JOIN player ON (company_application.player_id = player.id)
 WHERE company_id = $1
-  AND expired_at <= CURRENT_TIMESTAMP;
+  AND expired_at >= CURRENT_TIMESTAMP;
 
 -- name: GetCompaniesApplications :many
 SELECT *

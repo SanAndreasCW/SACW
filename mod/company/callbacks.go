@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/auth"
+	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
-	"github.com/SanAndreasCW/SACW/mod/types"
 )
 
 func onAuthSuccess(e *auth.OnAuthSuccessEvent) {
@@ -25,9 +25,11 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		return true
 	}
 	for _, company := range companies {
-		Companies[company.ID] = &types.CompanyI{
+		commons.Companies[company.ID] = &commons.CompanyI{
 			StoreModel: &company,
 		}
+		commons.Companies[company.ID].ReloadApplications()
+		logger.Info("[Company]: Loaded %d applications for company %s", len(commons.Companies[company.ID].Applications), company.Name)
 	}
 	logger.Info("[Company]: Loaded %d companies", len(companies))
 	return true

@@ -115,30 +115,61 @@ func (q *Queries) GetCompaniesApplications(ctx context.Context) ([]CompanyApplic
 }
 
 const getCompanyApplications = `-- name: GetCompanyApplications :many
-SELECT id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
+SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.second, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at
 FROM company_application
+         JOIN player ON (company_application.player_id = player.id)
 WHERE company_id = $1
-  AND expired_at <= CURRENT_TIMESTAMP
+  AND expired_at >= CURRENT_TIMESTAMP
 `
 
-func (q *Queries) GetCompanyApplications(ctx context.Context, companyID int32) ([]CompanyApplication, error) {
+type GetCompanyApplicationsRow struct {
+	CompanyApplication CompanyApplication
+	Player             Player
+}
+
+func (q *Queries) GetCompanyApplications(ctx context.Context, companyID int32) ([]GetCompanyApplicationsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getCompanyApplications, companyID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CompanyApplication
+	var items []GetCompanyApplicationsRow
 	for rows.Next() {
-		var i CompanyApplication
+		var i GetCompanyApplicationsRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.PlayerID,
-			&i.CompanyID,
-			&i.Description,
-			&i.Accepted,
-			&i.CreatedAt,
-			&i.ExpiredAt,
-			&i.AnsweredAt,
+			&i.CompanyApplication.ID,
+			&i.CompanyApplication.PlayerID,
+			&i.CompanyApplication.CompanyID,
+			&i.CompanyApplication.Description,
+			&i.CompanyApplication.Accepted,
+			&i.CompanyApplication.CreatedAt,
+			&i.CompanyApplication.ExpiredAt,
+			&i.CompanyApplication.AnsweredAt,
+			&i.Player.ID,
+			&i.Player.Username,
+			&i.Player.Password,
+			&i.Player.Money,
+			&i.Player.Level,
+			&i.Player.Exp,
+			&i.Player.Gold,
+			&i.Player.Token,
+			&i.Player.Hour,
+			&i.Player.Minute,
+			&i.Player.Second,
+			&i.Player.Vip,
+			&i.Player.Helper,
+			&i.Player.IsOnline,
+			&i.Player.Kills,
+			&i.Player.Deaths,
+			&i.Player.PosX,
+			&i.Player.PosY,
+			&i.Player.PosZ,
+			&i.Player.PosAngle,
+			&i.Player.Language,
+			&i.Player.LastLogin,
+			&i.Player.LastPlayed,
+			&i.Player.CreatedAt,
+			&i.Player.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

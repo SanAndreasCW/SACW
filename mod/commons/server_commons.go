@@ -1,4 +1,4 @@
-package auth
+package commons
 
 import (
 	"github.com/RahRow/omp"

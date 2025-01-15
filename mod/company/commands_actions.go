@@ -3,13 +3,13 @@ package company
 import (
 	"fmt"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/setting"
-	"github.com/SanAndreasCW/SACW/mod/types"
 )
 
-func companyApplicationAction(playerI *types.PlayerI, tag *string) {
-	for _, company := range Companies {
+func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
+	for _, company := range commons.Companies {
 		if company.StoreModel.Tag == *tag {
 			dialogBody := fmt.Sprintf(
 				"Enter company application request description for %s company.",
@@ -59,7 +59,7 @@ func companyApplicationAction(playerI *types.PlayerI, tag *string) {
 	playerI.Player.SendClientMessage("[Company Application]: Company tag not found.", 1)
 }
 
-func companyHistoryAction(playerI *types.PlayerI) {
+func companiesHistoryAction(playerI *commons.PlayerI) {
 	if len(playerI.Companies) <= 0 {
 		msgDialog := omp.NewMessageDialog(
 			"Companies History List",
@@ -72,7 +72,7 @@ func companyHistoryAction(playerI *types.PlayerI) {
 	}
 	companyHistory := omp.NewTabListDialog("Companies History List", "Select", "Close")
 	for _, company := range playerI.Companies {
-		companyI := Companies[company.StoreModel.ID]
+		companyI := commons.Companies[company.StoreModel.ID]
 		companyHistory.Add(omp.TabListItem{
 			companyI.StoreModel.Name,
 			companyI.StoreModel.Tag,
@@ -82,7 +82,7 @@ func companyHistoryAction(playerI *types.PlayerI) {
 	companyHistory.ShowFor(playerI.Player)
 }
 
-func companyApplicationsActions(playerI *types.PlayerI) {
+func companyApplicationsActions(playerI *commons.PlayerI) {
 	company := playerI.GetCurrentCompany()
 	if company == nil {
 		playerI.SendClientMessage(
@@ -95,16 +95,24 @@ func companyApplicationsActions(playerI *types.PlayerI) {
 		dialog := omp.NewMessageDialog(
 			"Company Applications",
 			"No applications found in the company which you are in",
-			"Select",
 			"Close",
+			"",
 		)
 		dialog.ShowFor(playerI.Player)
 		return
 	}
 	companyApplications := omp.NewTabListDialog("Company Applications", "Select", "Close")
+	companyApplications.Add(omp.TabListItem{
+		"Player Name",
+		"Requested At",
+		"Expire At",
+	})
 	for _, companyApplication := range company.Applications {
 		companyApplications.Add(omp.TabListItem{
-			string(companyApplication.StoreModel.PlayerID),
+			string(companyApplication.PlayerModel.Username),
+			companyApplication.StoreModel.CreatedAt.Time.Format("2006-01-02 15:04:05"),
+			companyApplication.StoreModel.ExpiredAt.Time.Format("2006-01-02 15:04:05"),
 		})
 	}
+	companyApplications.ShowFor(playerI.Player)
 }

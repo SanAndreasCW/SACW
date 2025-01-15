@@ -14,7 +14,8 @@ func init() {
 	omp.Events.Listen(omp.EventTypeGameModeInit, onGameModeInit)
 
 	// Commands
-	omp.Commands.Add("companies", companyCommand)
+	omp.Commands.Add("companies", companiesCommand)
+	omp.Commands.Add("company", companyCommand)
 
 	// Module Announcement
 	logger.Info("Company module initialized")

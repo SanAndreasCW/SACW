@@ -3,13 +3,13 @@ package auth
 import (
 	"context"
 	"fmt"
+	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/kodeyeen/event"
 	"time"
 
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
-	"github.com/SanAndreasCW/SACW/mod/types"
 	"github.com/matthewhartstonge/argon2"
 )
 
@@ -21,8 +21,8 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 	argon := argon2.DefaultConfig()
 	player := e.Player
-	playerCache := &types.PlayerCache{Player: player, LoginAttempts: 0}
-	PlayersCache[player.ID()] = playerCache
+	playerCache := &commons.PlayerCache{Player: player, LoginAttempts: 0}
+	commons.PlayersCache[player.ID()] = playerCache
 	q := database.New(database.DB)
 	ctx := context.Background()
 	user, err := q.GetPlayerByUsername(ctx, player.Name())
@@ -55,11 +55,11 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				player.Kick()
 				return true
 			}
-			playerI := &types.PlayerI{
+			playerI := &commons.PlayerI{
 				Player:     player,
 				StoreModel: &user,
 			}
-			PlayersI[playerI.ID()] = playerI
+			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
 				Success: true,
@@ -90,11 +90,11 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				loginDialog.ShowFor(player)
 				return true
 			}
-			playerI := &types.PlayerI{
+			playerI := &commons.PlayerI{
 				Player:     player,
 				StoreModel: &user,
 			}
-			PlayersI[playerI.ID()] = playerI
+			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
 				Success: true,
@@ -108,7 +108,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 }
 
 func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
-	player := PlayersI[e.Player.ID()]
+	player := commons.PlayersI[e.Player.ID()]
 	ctx := context.Background()
 	playerPosition := player.Position()
 	player.StoreModel.PosX = playerPosition.X
@@ -139,9 +139,9 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 		PosAngle: player.StoreModel.PosAngle,
 		Language: player.StoreModel.Language,
 	})
-	delete(PlayersI, e.Player.ID())
+	delete(commons.PlayersI, e.Player.ID())
 	if err != nil {
-		logger.Fatal("[Player:%s] Error updating player: %v", e.Player.Name(), err)
+		logger.Fatal("[Player:%s] Error updating auth: %v", e.Player.Name(), err)
 		return true
 	}
 	return true
@@ -153,7 +153,7 @@ func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
 }
 
 func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
-	player := PlayersI[e.Player.ID()]
+	player := commons.PlayersI[e.Player.ID()]
 	player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
 	player.SetFacingAngle(player.StoreModel.PosAngle)
 	return true
@@ -161,6 +161,6 @@ func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 
 func onPlayerText(e *omp.PlayerTextEvent) bool {
 	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", e.Player.ID(), e.Player.Name(), e.Message)
-	SendClientMessageToAll(msg, 0xFFFFFFFF)
+	commons.SendClientMessageToAll(msg, 0xFFFFFFFF)
 	return true
 }

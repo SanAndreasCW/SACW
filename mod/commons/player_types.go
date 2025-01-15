@@ -1,4 +1,4 @@
-package types
+package commons
 
 import (
 	"context"
@@ -22,13 +22,11 @@ func (p *PlayerI) GetCurrentCompany() *CompanyI {
 	ctx := context.Background()
 	q := database.New(database.DB)
 	if p.Company == nil {
-		company, err := q.GetUserActiveCompany(ctx, p.StoreModel.ID)
+		c, err := q.GetUserActiveCompany(ctx, p.StoreModel.ID)
 		if err != nil {
 			return nil
 		}
-		p.Company = &CompanyI{
-			StoreModel: &company,
-		}
+		p.Company = Companies[c.ID]
 	}
 	return p.Company
 }
