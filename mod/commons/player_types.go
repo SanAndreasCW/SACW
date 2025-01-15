@@ -6,11 +6,16 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/database"
 )
 
+type PlayerMembership struct {
+	Company       *CompanyI
+	CompanyMember *database.CompanyMember
+}
+
 type PlayerI struct {
 	*omp.Player
-	StoreModel *database.Player
-	Company    *CompanyI
-	Companies  []*CompanyMemberInfoI
+	StoreModel        *database.Player
+	CompanyMemberInfo *PlayerMembership
+	Companies         []*CompanyMemberInfoI
 }
 
 type PlayerCache struct {
@@ -18,17 +23,20 @@ type PlayerCache struct {
 	LoginAttempts int
 }
 
-func (p *PlayerI) GetCurrentCompany() *CompanyI {
+func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
 	ctx := context.Background()
 	q := database.New(database.DB)
-	if p.Company == nil {
+	if p.CompanyMemberInfo == nil {
 		c, err := q.GetUserActiveCompany(ctx, p.StoreModel.ID)
 		if err != nil {
 			return nil
 		}
-		p.Company = Companies[c.ID]
+		p.CompanyMemberInfo = &PlayerMembership{
+			Company:       Companies[c.Company.ID],
+			CompanyMember: &c.CompanyMember,
+		}
 	}
-	return p.Company
+	return p.CompanyMemberInfo
 }
 
 func (p *PlayerI) GetPlayerCompanies() []*CompanyI {

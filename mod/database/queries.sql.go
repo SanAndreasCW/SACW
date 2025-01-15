@@ -379,23 +379,32 @@ func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Pla
 }
 
 const getUserActiveCompany = `-- name: GetUserActiveCompany :one
-SELECT company.id, company.name, company.tag, company.description, company.balance, company.multiplier
+SELECT company.id, company.name, company.tag, company.description, company.balance, company.multiplier, company_member.id, company_member.player_id, company_member.company_id, company_member.role
 FROM company
          JOIN company_member ON (company.id = company_member.company_id)
 WHERE company_member.player_id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetUserActiveCompany(ctx context.Context, playerID int32) (Company, error) {
+type GetUserActiveCompanyRow struct {
+	Company       Company
+	CompanyMember CompanyMember
+}
+
+func (q *Queries) GetUserActiveCompany(ctx context.Context, playerID int32) (GetUserActiveCompanyRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserActiveCompany, playerID)
-	var i Company
+	var i GetUserActiveCompanyRow
 	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Tag,
-		&i.Description,
-		&i.Balance,
-		&i.Multiplier,
+		&i.Company.ID,
+		&i.Company.Name,
+		&i.Company.Tag,
+		&i.Company.Description,
+		&i.Company.Balance,
+		&i.Company.Multiplier,
+		&i.CompanyMember.ID,
+		&i.CompanyMember.PlayerID,
+		&i.CompanyMember.CompanyID,
+		&i.CompanyMember.Role,
 	)
 	return i, err
 }

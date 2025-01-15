@@ -57,7 +57,7 @@ SET last_played = CURRENT_TIMESTAMP
 WHERE id = $1;
 
 -- name: GetUserActiveCompany :one
-SELECT company.*
+SELECT sqlc.embed(company), sqlc.embed(company_member)
 FROM company
          JOIN company_member ON (company.id = company_member.company_id)
 WHERE company_member.player_id = $1

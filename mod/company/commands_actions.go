@@ -6,6 +6,7 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/setting"
+	"slices"
 )
 
 func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
@@ -83,18 +84,25 @@ func companiesHistoryAction(playerI *commons.PlayerI) {
 }
 
 func companyApplicationsActions(playerI *commons.PlayerI) {
-	company := playerI.GetCurrentCompany()
-	if company == nil {
+	companyMembership := playerI.GetCurrentCompanyMembership()
+	if companyMembership == nil {
 		playerI.SendClientMessage(
-			"[Company Applications]: You are not in a company to check incoming company applications",
+			"[Company Applications]: You are not in a company to check incoming company applications.",
 			1,
 		)
 		return
 	}
-	if len(company.Applications) <= 0 {
+	if !slices.Contains(commons.CompanyApplicationPermissions, companyMembership.CompanyMember.Role) {
+		playerI.SendClientMessage(
+			"[Company Applications]: You are not allowed to access company applications.",
+			1,
+		)
+		return
+	}
+	if len(companyMembership.Company.Applications) <= 0 {
 		dialog := omp.NewMessageDialog(
 			"Company Applications",
-			"No applications found in the company which you are in",
+			"No applications found in the company which you are in.",
 			"Close",
 			"",
 		)
@@ -107,7 +115,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 		"Requested At",
 		"Expire At",
 	})
-	for _, companyApplication := range company.Applications {
+	for _, companyApplication := range companyMembership.Company.Applications {
 		companyApplications.Add(omp.TabListItem{
 			string(companyApplication.PlayerModel.Username),
 			companyApplication.StoreModel.CreatedAt.Time.Format("2006-01-02 15:04:05"),
