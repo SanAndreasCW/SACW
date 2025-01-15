@@ -3,8 +3,7 @@ package timer
 import "time"
 
 func SetTimer(timer *Timer) chan bool {
-	interval := time.Duration(timer.TickRate) * time.Millisecond
-	ticker := time.NewTicker(interval)
+	ticker := time.NewTicker(timer.Duration)
 	clearTimer := make(chan bool)
 
 	go func() {

@@ -1,8 +1,10 @@
 package timer
 
+import "time"
+
 type Timer struct {
 	Callback func()
-	TickRate int
+	Duration time.Duration
 	Async    bool
 }
 
