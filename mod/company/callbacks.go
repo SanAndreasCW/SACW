@@ -7,6 +7,8 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/SanAndreasCW/SACW/mod/timer"
+	"time"
 )
 
 func onAuthSuccess(e *auth.OnAuthSuccessEvent) {
@@ -29,7 +31,10 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 			StoreModel: &company,
 		}
 		commons.Companies[company.ID].ReloadApplications()
-		logger.Info("[Company]: Loaded %d applications for company %s", len(commons.Companies[company.ID].Applications), company.Name)
+		timer.SetTimer(&timer.Timer{
+			Duration: time.Duration(1) * time.Minute,
+			Callback: commons.Companies[company.ID].ReloadApplications,
+		})
 	}
 	logger.Info("[Company]: Loaded %d companies", len(companies))
 	return true
