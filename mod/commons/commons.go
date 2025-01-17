@@ -25,6 +25,7 @@ func StringToInt[T ~int | ~int64 | ~int32 | ~int16 | ~int8](s *string) (T, error
 func StringToFloat[T ~float32 | ~float64](s *string) (T, error) {
 	parsed, err := strconv.ParseFloat(*s, 64)
 	if err != nil {
+		panic(err)
 		return T(0), err
 	}
 	return T(parsed), nil
