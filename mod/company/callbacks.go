@@ -11,12 +11,13 @@ import (
 	"time"
 )
 
-func onAuthSuccess(e *auth.OnAuthSuccessEvent) {
+func onAuthSuccess(e *auth.OnAuthSuccessEvent) bool {
 	if !e.Success {
-		return
+		return true
 	}
 	companyMembership := e.PlayerI.GetCurrentCompanyMembership()
 	companyMembership.Company.ReloadApplications()
+	return true
 }
 
 func onGameModeInit(_ *omp.GameModeInitEvent) bool {

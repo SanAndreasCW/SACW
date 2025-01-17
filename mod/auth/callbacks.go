@@ -21,7 +21,7 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 	argon := argon2.DefaultConfig()
 	player := e.Player
-	playerCache := &commons.PlayerCache{Player: player, LoginAttempts: 0}
+	playerCache := &commons.PlayerCache{Player: player, LoginAttempts: 0, IsLoggedIn: false}
 	commons.PlayersCache[player.ID()] = playerCache
 	q := database.New(database.DB)
 	ctx := context.Background()
@@ -94,6 +94,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				Player:     player,
 				StoreModel: &user,
 			}
+			playerCache.IsLoggedIn = true
 			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
@@ -108,6 +109,10 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 }
 
 func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
+	playerCache := commons.PlayersCache[e.Player.ID()]
+	if !playerCache.IsLoggedIn {
+		return true
+	}
 	player := commons.PlayersI[e.Player.ID()]
 	ctx := context.Background()
 	playerPosition := player.Position()
@@ -140,6 +145,7 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 		Language: player.StoreModel.Language,
 	})
 	delete(commons.PlayersI, e.Player.ID())
+	delete(commons.PlayersCache, e.Player.ID())
 	if err != nil {
 		logger.Fatal("[Player:%s] Error updating auth: %v", e.Player.Name(), err)
 		return true
@@ -153,9 +159,14 @@ func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
 }
 
 func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
-	player := commons.PlayersI[e.Player.ID()]
-	player.SetPosition(omp.Vector3{X: player.StoreModel.PosX, Y: player.StoreModel.PosY, Z: player.StoreModel.PosZ})
-	player.SetFacingAngle(player.StoreModel.PosAngle)
+	playerCache := commons.PlayersCache[e.Player.ID()]
+	if !playerCache.IsLoggedIn {
+		e.Player.Kick()
+		return true
+	}
+	playerI := commons.PlayersI[e.Player.ID()]
+	playerI.SetPosition(omp.Vector3{X: playerI.StoreModel.PosX, Y: playerI.StoreModel.PosY, Z: playerI.StoreModel.PosZ})
+	playerI.SetFacingAngle(playerI.StoreModel.PosAngle)
 	return true
 }
 

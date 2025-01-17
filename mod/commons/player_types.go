@@ -16,12 +16,13 @@ type PlayerI struct {
 	*omp.Player
 	StoreModel        *database.Player
 	CompanyMemberInfo *PlayerMembership
-	Companies         []*CompanyMemberInfoI
+	CompaniesHistory  []*CompanyMemberInfoI
 }
 
 type PlayerCache struct {
 	*omp.Player
 	LoginAttempts int
+	IsLoggedIn    bool
 }
 
 func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {

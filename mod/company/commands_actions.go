@@ -13,6 +13,11 @@ import (
 )
 
 func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
+	if playerI.CompanyMemberInfo != nil {
+		playerI.SendClientMessage("[Company Application]: Shoma dar hale hazer ozv yek company digar hastid.", 1)
+		return
+	}
+	logger.Fatal("%v", playerI.CompanyMemberInfo)
 	for _, company := range commons.Companies {
 		if company.StoreModel.Tag == *tag {
 			dialogBody := fmt.Sprintf(
@@ -64,7 +69,7 @@ func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
 }
 
 func companiesHistoryAction(playerI *commons.PlayerI) {
-	if len(playerI.Companies) <= 0 {
+	if len(playerI.CompaniesHistory) <= 0 {
 		msgDialog := omp.NewMessageDialog(
 			"Companies History List",
 			"You don't have any company history.",
@@ -75,7 +80,7 @@ func companiesHistoryAction(playerI *commons.PlayerI) {
 		return
 	}
 	companyHistory := omp.NewTabListDialog("Companies History List", "Select", "Close")
-	for _, company := range playerI.Companies {
+	for _, company := range playerI.CompaniesHistory {
 		companyI := commons.Companies[company.StoreModel.ID]
 		companyHistory.Add(omp.TabListItem{
 			companyI.StoreModel.Name,
