@@ -1,4 +1,4 @@
-package commons
+package enums
 
 const (
 	Trainee = iota

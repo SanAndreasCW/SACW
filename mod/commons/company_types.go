@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"sync"
 )
 
 type CompanyApplicationI struct {
@@ -16,6 +18,7 @@ type CompanyI struct {
 	StoreModel   *database.Company
 	Applications []*CompanyApplicationI
 	Members      []*PlayerI
+	MembersLock  sync.RWMutex
 }
 
 type CompanyMemberInfoI struct {
@@ -25,7 +28,10 @@ type CompanyMemberInfoI struct {
 func (ci *CompanyI) ReloadApplications() {
 	ctx := context.Background()
 	q := database.New(database.DB)
-	applications, err := q.GetCompanyApplications(ctx, ci.StoreModel.ID)
+	applications, err := q.GetCompanyApplications(ctx, database.GetCompanyApplicationsParams{
+		CompanyID: ci.StoreModel.ID,
+		Accepted:  enums.OnProgress,
+	})
 	if err != nil {
 		logger.Fatal("[CompanyApplications]: Couldn't load applications: %v", err)
 	}
@@ -68,4 +74,10 @@ func (ci *CompanyI) CreateApplication(playerI *PlayerI, description string) bool
 	} else {
 		return true
 	}
+}
+
+func (ci *CompanyI) AddMember(memberI *PlayerI) {
+	ci.MembersLock.Lock()
+	ci.Members = append(ci.Members, memberI)
+	ci.MembersLock.Unlock()
 }

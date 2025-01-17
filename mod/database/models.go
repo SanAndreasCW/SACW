@@ -35,6 +35,7 @@ type CompanyApplication struct {
 	Accepted    int16
 	CreatedAt   sql.NullTime
 	ExpiredAt   sql.NullTime
+	Answer      sql.NullString
 	AnsweredAt  sql.NullTime
 }
 

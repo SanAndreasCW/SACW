@@ -1,9 +1,12 @@
 package company
 
 import (
+	"context"
 	"fmt"
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/commons"
+	"github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/setting"
 	"slices"
@@ -99,7 +102,8 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 		)
 		return
 	}
-	if len(companyMembership.Company.Applications) <= 0 {
+	company := commons.Companies[companyMembership.Company.StoreModel.ID]
+	if len(company.Applications) <= 0 {
 		dialog := omp.NewMessageDialog(
 			"Company Applications",
 			"No applications found in the company which you are in.",
@@ -109,18 +113,161 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 		dialog.ShowFor(playerI.Player)
 		return
 	}
-	companyApplications := omp.NewTabListDialog("Company Applications", "Select", "Close")
-	companyApplications.Add(omp.TabListItem{
+	companyApplicationsDialog := omp.NewTabListDialog("Company Applications", "Select", "Close")
+	companyApplicationsDialog.Add(omp.TabListItem{
+		"Player ID",
 		"Player Name",
 		"Requested At",
 		"Expire At",
 	})
-	for _, companyApplication := range companyMembership.Company.Applications {
-		companyApplications.Add(omp.TabListItem{
-			string(companyApplication.PlayerModel.Username),
+	for _, companyApplication := range company.Applications {
+		playerModel := *companyApplication.PlayerModel
+		companyApplicationsDialog.Add(omp.TabListItem{
+			commons.IntToString(playerModel.ID),
+			playerModel.Username,
 			companyApplication.StoreModel.CreatedAt.Time.Format("2006-01-02 15:04:05"),
 			companyApplication.StoreModel.ExpiredAt.Time.Format("2006-01-02 15:04:05"),
 		})
 	}
-	companyApplications.ShowFor(playerI.Player)
+	companyApplicationsDialog.On(omp.EventTypeDialogResponse, func(e *omp.TabListDialogResponseEvent) bool {
+		if e.Response == omp.DialogResponseRight || e.ItemNumber == 0 {
+			return true
+		}
+		playerID, _ := commons.StringToInt[int32](&e.Item[0])
+		applicationManagementDialog := omp.NewListDialog("Company Applications", "Select", "Close")
+		applicationManagementDialog.Add("Player Stats")
+		applicationManagementDialog.Add("Accept")
+		applicationManagementDialog.Add("Reject")
+		applicationManagementDialog.Add("Cancel")
+		applicationManagementDialog.On(omp.EventTypeDialogResponse, func(e *omp.ListDialogResponseEvent) bool {
+			if e.Response == omp.DialogResponseRight {
+				return true
+			}
+			ctx := context.Background()
+			q := database.New(database.DB)
+			switch e.Item {
+			case "Player Stats":
+				var (
+					playerDB                  database.Player
+					err                       error
+					playerCompanyApplications []database.GetUserCompanyApplicationsHistoryRow
+				)
+				playerDB, err = q.GetPlayerByID(ctx, playerID)
+				logger.Fatal("%i", playerID)
+				if err != nil {
+					logger.Fatal("%v", err)
+					commons.TechnicalIssueDialog(playerI.Player)
+					return true
+				}
+				playerCompanyApplications, err = q.GetUserCompanyApplicationsHistory(ctx, database.GetUserCompanyApplicationsHistoryParams{
+					PlayerID:  playerID,
+					CompanyID: company.StoreModel.ID,
+				})
+				if err != nil {
+					logger.Fatal("%v", err)
+					commons.TechnicalIssueDialog(playerI.Player)
+					return true
+				}
+				playerStatsDialog := omp.NewTabListDialog(
+					"Application Player Stats",
+					"<< Back",
+					"Close",
+				)
+				playerStatsDialog.Add(omp.TabListItem{
+					"Player Name",
+					playerDB.Username,
+				})
+				playerStatsDialog.Add(omp.TabListItem{
+					"Player Level",
+					string(rune(playerDB.Level)),
+				})
+				playerStatsDialog.Add(omp.TabListItem{
+					"Last Login",
+					playerDB.LastLogin.Time.Format("2006-01-02 15:04:05"),
+				})
+				playerStatsDialog.Add(omp.TabListItem{
+					"Last Played",
+					playerDB.LastPlayed.Time.Format("2006-01-02 15:04:05"),
+				})
+				for _, playerCompanyApplication := range playerCompanyApplications {
+					playerStatsDialog.Add(omp.TabListItem{
+						fmt.Sprintf(
+							"%s|%s", playerCompanyApplication.Company.Name,
+							commons.If(
+								playerCompanyApplication.CompanyApplication.Accepted == enums.Accepted,
+								"Accepted",
+								"Rejected",
+							),
+						),
+						playerCompanyApplication.CompanyApplication.Answer.String,
+					})
+				}
+				playerStatsDialog.On(omp.EventTypeDialogResponse, func(e *omp.TabListDialogResponseEvent) bool {
+					if e.Response == omp.DialogResponseLeft {
+						applicationManagementDialog.ShowFor(playerI.Player)
+					}
+					return true
+				})
+				playerStatsDialog.ShowFor(playerI.Player)
+				return true
+			case "Accept", "Reject":
+				tx, _ := database.DB.Begin()
+				qtx := q.WithTx(tx)
+				err := qtx.AnswerCompanyApplication(ctx, database.AnswerCompanyApplicationParams{
+					PlayerID:  playerID,
+					CompanyID: company.StoreModel.ID,
+					Accepted:  commons.If[int16](e.Item == "Accept", enums.Accepted, enums.Rejected),
+				})
+				if err != nil {
+					commons.TechnicalIssueDialog(playerI.Player)
+					return true
+				}
+				failedDialog := omp.NewMessageDialog(
+					"Failed to accept application",
+					"Failed to accept this answer.",
+					"Ok",
+					"",
+				)
+				companyMember, err := qtx.InsertCompanyMembers(ctx, database.InsertCompanyMembersParams{
+					CompanyID: company.StoreModel.ID,
+					PlayerID:  playerID,
+				})
+				if err != nil {
+					logger.Fatal("Failed to insert company member %v", err)
+					failedDialog.Body = "Player is already in another company."
+					failedDialog.ShowFor(playerI.Player)
+					return true
+				}
+				err = tx.Commit()
+				if err != nil {
+					logger.Fatal("Failed to commit transaction: %v", err)
+					err = tx.Rollback()
+					logger.Fatal("Failed to rollback transaction: %v", err)
+					failedDialog.ShowFor(playerI.Player)
+					return true
+				}
+				go companyMembership.Company.ReloadApplications()
+				playerI.SendClientMessage("You've successfully accepted the application.", 1)
+				go func() {
+					for _, player := range commons.PlayersI {
+						if player.StoreModel.ID == playerID {
+							player.SendClientMessage("You've successfully accepted in the guild.", 1)
+							player.CompanyMemberInfo = &commons.PlayerMembership{
+								CompanyMember: &companyMember,
+								Company:       company,
+							}
+							return
+						}
+					}
+				}()
+				return true
+			case "Cancel":
+				return true
+			}
+			return true
+		})
+		applicationManagementDialog.ShowFor(playerI.Player)
+		return true
+	})
+	companyApplicationsDialog.ShowFor(playerI.Player)
 }

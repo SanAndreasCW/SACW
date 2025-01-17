@@ -90,6 +90,11 @@ SELECT *
 FROM company_member
 WHERE company_id = $1;
 
+-- name: InsertCompanyMembers :one
+INSERT INTO company_member (player_id, company_id)
+VALUES ($1, $2)
+RETURNING *;
+
 -- name: GetCompanyMembersInfo :many
 SELECT *
 FROM company_member_info
@@ -99,8 +104,23 @@ WHERE company_id = $1;
 SELECT sqlc.embed(company_application), sqlc.embed(player)
 FROM company_application
          JOIN player ON (company_application.player_id = player.id)
-WHERE company_id = $1
-  AND expired_at >= CURRENT_TIMESTAMP;
+WHERE company_application.company_id = $1
+  AND company_application.expired_at >= CURRENT_TIMESTAMP
+  AND company_application.accepted = $2
+  AND NOT EXISTS (SELECT 1
+                  FROM company_member
+                  WHERE company_member.player_id = player.id);
+
+-- name: GetUserCompanyApplicationsHistory :many
+SELECT sqlc.embed(company_application), sqlc.embed(player), sqlc.embed(company)
+FROM company_application
+         JOIN player ON (company_application.player_id = player.id)
+         JOIN company ON (company_application.company_id = company.id)
+WHERE company_application.company_id = $1
+  AND company_application.player_id = $2
+  AND company_application.expired_at >= CURRENT_TIMESTAMP
+  AND company_application.accepted != 0
+LIMIT 4;
 
 -- name: GetCompaniesApplications :many
 SELECT *
@@ -113,7 +133,7 @@ SET accepted    = $1,
     answered_at = CURRENT_TIMESTAMP
 WHERE player_id = $2
   AND company_id = $3
-  AND accepted = false;
+  AND accepted = 0;
 
 -- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)

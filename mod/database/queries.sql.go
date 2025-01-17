@@ -16,7 +16,7 @@ SET accepted    = $1,
     answered_at = CURRENT_TIMESTAMP
 WHERE player_id = $2
   AND company_id = $3
-  AND accepted = false
+  AND accepted = 0
 `
 
 type AnswerCompanyApplicationParams struct {
@@ -77,7 +77,7 @@ func (q *Queries) GetCompanies(ctx context.Context) ([]Company, error) {
 }
 
 const getCompaniesApplications = `-- name: GetCompaniesApplications :many
-SELECT id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
+SELECT id, player_id, company_id, description, accepted, created_at, expired_at, answer, answered_at
 FROM company_application
 WHERE expired_at <= CURRENT_TIMESTAMP
 `
@@ -99,6 +99,7 @@ func (q *Queries) GetCompaniesApplications(ctx context.Context) ([]CompanyApplic
 			&i.Accepted,
 			&i.CreatedAt,
 			&i.ExpiredAt,
+			&i.Answer,
 			&i.AnsweredAt,
 		); err != nil {
 			return nil, err
@@ -115,20 +116,29 @@ func (q *Queries) GetCompaniesApplications(ctx context.Context) ([]CompanyApplic
 }
 
 const getCompanyApplications = `-- name: GetCompanyApplications :many
-SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.second, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at
+SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answer, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.second, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at
 FROM company_application
          JOIN player ON (company_application.player_id = player.id)
-WHERE company_id = $1
-  AND expired_at >= CURRENT_TIMESTAMP
+WHERE company_application.company_id = $1
+  AND company_application.expired_at >= CURRENT_TIMESTAMP
+  AND company_application.accepted = $2
+  AND NOT EXISTS (SELECT 1
+                  FROM company_member
+                  WHERE company_member.player_id = player.id)
 `
+
+type GetCompanyApplicationsParams struct {
+	CompanyID int32
+	Accepted  int16
+}
 
 type GetCompanyApplicationsRow struct {
 	CompanyApplication CompanyApplication
 	Player             Player
 }
 
-func (q *Queries) GetCompanyApplications(ctx context.Context, companyID int32) ([]GetCompanyApplicationsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCompanyApplications, companyID)
+func (q *Queries) GetCompanyApplications(ctx context.Context, arg GetCompanyApplicationsParams) ([]GetCompanyApplicationsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCompanyApplications, arg.CompanyID, arg.Accepted)
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +154,7 @@ func (q *Queries) GetCompanyApplications(ctx context.Context, companyID int32) (
 			&i.CompanyApplication.Accepted,
 			&i.CompanyApplication.CreatedAt,
 			&i.CompanyApplication.ExpiredAt,
+			&i.CompanyApplication.Answer,
 			&i.CompanyApplication.AnsweredAt,
 			&i.Player.ID,
 			&i.Player.Username,
@@ -446,10 +457,97 @@ func (q *Queries) GetUserCompaniesInfo(ctx context.Context, playerID int32) ([]C
 	return items, nil
 }
 
+const getUserCompanyApplicationsHistory = `-- name: GetUserCompanyApplicationsHistory :many
+SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answer, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.second, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at, company.id, company.name, company.tag, company.description, company.balance, company.multiplier
+FROM company_application
+         JOIN player ON (company_application.player_id = player.id)
+         JOIN company ON (company_application.company_id = company.id)
+WHERE company_application.company_id = $1
+  AND company_application.player_id = $2
+  AND company_application.expired_at >= CURRENT_TIMESTAMP
+  AND company_application.accepted != 0
+LIMIT 4
+`
+
+type GetUserCompanyApplicationsHistoryParams struct {
+	CompanyID int32
+	PlayerID  int32
+}
+
+type GetUserCompanyApplicationsHistoryRow struct {
+	CompanyApplication CompanyApplication
+	Player             Player
+	Company            Company
+}
+
+func (q *Queries) GetUserCompanyApplicationsHistory(ctx context.Context, arg GetUserCompanyApplicationsHistoryParams) ([]GetUserCompanyApplicationsHistoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserCompanyApplicationsHistory, arg.CompanyID, arg.PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserCompanyApplicationsHistoryRow
+	for rows.Next() {
+		var i GetUserCompanyApplicationsHistoryRow
+		if err := rows.Scan(
+			&i.CompanyApplication.ID,
+			&i.CompanyApplication.PlayerID,
+			&i.CompanyApplication.CompanyID,
+			&i.CompanyApplication.Description,
+			&i.CompanyApplication.Accepted,
+			&i.CompanyApplication.CreatedAt,
+			&i.CompanyApplication.ExpiredAt,
+			&i.CompanyApplication.Answer,
+			&i.CompanyApplication.AnsweredAt,
+			&i.Player.ID,
+			&i.Player.Username,
+			&i.Player.Password,
+			&i.Player.Money,
+			&i.Player.Level,
+			&i.Player.Exp,
+			&i.Player.Gold,
+			&i.Player.Token,
+			&i.Player.Hour,
+			&i.Player.Minute,
+			&i.Player.Second,
+			&i.Player.Vip,
+			&i.Player.Helper,
+			&i.Player.IsOnline,
+			&i.Player.Kills,
+			&i.Player.Deaths,
+			&i.Player.PosX,
+			&i.Player.PosY,
+			&i.Player.PosZ,
+			&i.Player.PosAngle,
+			&i.Player.Language,
+			&i.Player.LastLogin,
+			&i.Player.LastPlayed,
+			&i.Player.CreatedAt,
+			&i.Player.UpdatedAt,
+			&i.Company.ID,
+			&i.Company.Name,
+			&i.Company.Tag,
+			&i.Company.Description,
+			&i.Company.Balance,
+			&i.Company.Multiplier,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertCompanyApplication = `-- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)
 VALUES ($1, $2, $3)
-RETURNING id, player_id, company_id, description, accepted, created_at, expired_at, answered_at
+RETURNING id, player_id, company_id, description, accepted, created_at, expired_at, answer, answered_at
 `
 
 type InsertCompanyApplicationParams struct {
@@ -469,7 +567,31 @@ func (q *Queries) InsertCompanyApplication(ctx context.Context, arg InsertCompan
 		&i.Accepted,
 		&i.CreatedAt,
 		&i.ExpiredAt,
+		&i.Answer,
 		&i.AnsweredAt,
+	)
+	return i, err
+}
+
+const insertCompanyMembers = `-- name: InsertCompanyMembers :one
+INSERT INTO company_member (player_id, company_id)
+VALUES ($1, $2)
+RETURNING id, player_id, company_id, role
+`
+
+type InsertCompanyMembersParams struct {
+	PlayerID  int32
+	CompanyID int32
+}
+
+func (q *Queries) InsertCompanyMembers(ctx context.Context, arg InsertCompanyMembersParams) (CompanyMember, error) {
+	row := q.db.QueryRowContext(ctx, insertCompanyMembers, arg.PlayerID, arg.CompanyID)
+	var i CompanyMember
+	err := row.Scan(
+		&i.ID,
+		&i.PlayerID,
+		&i.CompanyID,
+		&i.Role,
 	)
 	return i, err
 }

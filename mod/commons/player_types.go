@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/logger"
 )
 
 type PlayerMembership struct {
@@ -29,6 +30,7 @@ func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
 	if p.CompanyMemberInfo == nil {
 		c, err := q.GetUserActiveCompany(ctx, p.StoreModel.ID)
 		if err != nil {
+			logger.Fatal("[PlayerI] GetCurrentCompanyMembership Error:", err)
 			return nil
 		}
 		p.CompanyMemberInfo = &PlayerMembership{

@@ -86,13 +86,14 @@ CREATE TABLE IF NOT EXISTS company_member_info
 CREATE TABLE IF NOT EXISTS company_application
 (
     id          SERIAL PRIMARY KEY,
-    player_id   INT         NOT NULL,
-    company_id  INT         NOT NULL,
-    description VARCHAR(80) NULL,
+    player_id   INT                 NOT NULL,
+    company_id  INT                 NOT NULL,
+    description VARCHAR(80)         NULL,
     accepted    int2      DEFAULT 0 NOT NULL,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expired_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '1' DAY,
-    answered_at TIMESTAMP   NULL,
+    answer      VARCHAR(20)         NULL,
+    answered_at TIMESTAMP           NULL,
     FOREIGN KEY (player_id) REFERENCES player (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE
 );

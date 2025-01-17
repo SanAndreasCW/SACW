@@ -2,8 +2,8 @@ package commons
 
 func If[T any](condition bool, a T, b T) T {
 	if condition {
-		return a
+		return T(a)
 	} else {
-		return b
+		return T(b)
 	}
 }

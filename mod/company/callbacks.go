@@ -15,6 +15,8 @@ func onAuthSuccess(e *auth.OnAuthSuccessEvent) {
 	if !e.Success {
 		return
 	}
+	companyMembership := e.PlayerI.GetCurrentCompanyMembership()
+	companyMembership.Company.ReloadApplications()
 }
 
 func onGameModeInit(_ *omp.GameModeInitEvent) bool {
