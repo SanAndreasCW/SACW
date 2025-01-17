@@ -36,6 +36,7 @@ func (ci *CompanyI) ReloadApplications() {
 	if err != nil {
 		logger.Fatal("[CompanyApplications]: Couldn't load applications: %v", err)
 	}
+	ci.ApplicationsMutex.Lock()
 	ci.Applications = nil
 	for _, application := range applications {
 		ci.Applications = append(ci.Applications, &CompanyApplicationI{
@@ -43,6 +44,7 @@ func (ci *CompanyI) ReloadApplications() {
 			PlayerModel: &application.Player,
 		})
 	}
+	ci.ApplicationsMutex.Unlock()
 }
 
 func (ci *CompanyI) AnswerApplication(playerI *PlayerI, answer int16) bool {
