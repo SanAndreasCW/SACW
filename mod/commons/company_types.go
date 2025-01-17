@@ -17,9 +17,9 @@ type CompanyApplicationI struct {
 type CompanyI struct {
 	StoreModel        *database.Company
 	Applications      []*CompanyApplicationI
-	ApplicationsMutex *sync.RWMutex
+	ApplicationsMutex sync.RWMutex
 	Members           []*PlayerI
-	MembersLock       *sync.RWMutex
+	MembersLock       sync.RWMutex
 }
 
 type CompanyMemberInfoI struct {
