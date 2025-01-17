@@ -29,16 +29,18 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		logger.Fatal("[Company]: Failed to load companies: %v", err)
 		return true
 	}
-	for _, company := range companies {
-		commons.Companies[company.ID] = &commons.CompanyI{
-			StoreModel: &company,
-		}
-		commons.Companies[company.ID].ReloadApplications()
-		timer.SetTimer(&timer.Timer{
-			Duration: time.Duration(1) * time.Minute,
-			Callback: commons.Companies[company.ID].ReloadApplications,
-		})
-	}
+	timer.SetTimer(&timer.Timer{
+		Duration: time.Duration(1) * time.Minute,
+		Callback: func() {
+			for _, company := range companies {
+				companyI := &commons.CompanyI{
+					StoreModel: &company,
+				}
+				commons.Companies[company.ID] = companyI
+				companyI.ReloadApplications()
+			}
+		},
+	})
 	logger.Info("[Company]: Loaded %d companies", len(companies))
 	return true
 }
