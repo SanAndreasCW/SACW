@@ -137,5 +137,9 @@ WHERE player_id = $2
 
 -- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)
-VALUES ($1, $2, $3)
+SELECT $1, $2, $3
+WHERE NOT EXISTS (
+    SELECT 1 FROM company_member
+    WHERE player_id = $1
+)
 RETURNING *;

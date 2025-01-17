@@ -15,10 +15,11 @@ type CompanyApplicationI struct {
 }
 
 type CompanyI struct {
-	StoreModel   *database.Company
-	Applications []*CompanyApplicationI
-	Members      []*PlayerI
-	MembersLock  sync.RWMutex
+	StoreModel        *database.Company
+	Applications      []*CompanyApplicationI
+	ApplicationsMutex *sync.RWMutex
+	Members           []*PlayerI
+	MembersLock       *sync.RWMutex
 }
 
 type CompanyMemberInfoI struct {
@@ -58,6 +59,14 @@ func (ci *CompanyI) AnswerApplication(playerI *PlayerI, answer int16) bool {
 	return true
 }
 
+func (ci *CompanyI) AddApplication(application *database.CompanyApplication) {
+	ci.ApplicationsMutex.Lock()
+	defer ci.ApplicationsMutex.Unlock()
+	ci.Applications = append(ci.Applications, &CompanyApplicationI{
+		StoreModel: application,
+	})
+}
+
 func (ci *CompanyI) CreateApplication(playerI *PlayerI, description string) bool {
 	ctx := context.Background()
 	q := database.New(database.DB)
@@ -66,14 +75,12 @@ func (ci *CompanyI) CreateApplication(playerI *PlayerI, description string) bool
 		CompanyID:   ci.StoreModel.ID,
 		Description: sql.NullString{String: description, Valid: true},
 	})
-	ci.Applications = append(ci.Applications, &CompanyApplicationI{
-		StoreModel: &application,
-	})
 	if err != nil {
+		logger.Fatal("[CreateApplication]: Couldn't create application: %v", err)
 		return false
-	} else {
-		return true
 	}
+	ci.AddApplication(&application)
+	return true
 }
 
 func (ci *CompanyI) AddMember(memberI *PlayerI) {

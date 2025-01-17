@@ -546,7 +546,11 @@ func (q *Queries) GetUserCompanyApplicationsHistory(ctx context.Context, arg Get
 
 const insertCompanyApplication = `-- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)
-VALUES ($1, $2, $3)
+SELECT $1, $2, $3
+WHERE NOT EXISTS (
+    SELECT 1 FROM company_member
+    WHERE player_id = $1
+)
 RETURNING id, player_id, company_id, description, accepted, created_at, expired_at, answer, answered_at
 `
 

@@ -45,7 +45,7 @@ func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
 				if isCreated != true {
 					logger.Fatal("[CompanyApplication]: Failed to save company application")
 					playerI.SendClientMessage(
-						"[Company Application]: Your application was not sent, please try again later.",
+						"[Company Application]: Shoma dar hal hazer ozv yek company hastid.",
 						1,
 					)
 					return true
@@ -80,7 +80,7 @@ func companiesHistoryAction(playerI *commons.PlayerI) {
 		companyHistory.Add(omp.TabListItem{
 			companyI.StoreModel.Name,
 			companyI.StoreModel.Tag,
-			string(rune(companyI.StoreModel.Multiplier.Float64)),
+			commons.FloatToString(companyI.StoreModel.Multiplier.Float64),
 		})
 	}
 	companyHistory.ShowFor(playerI.Player)
@@ -179,7 +179,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 				})
 				playerStatsDialog.Add(omp.TabListItem{
 					"Player Level",
-					string(rune(playerDB.Level)),
+					commons.IntToString[int32](playerDB.Level),
 				})
 				playerStatsDialog.Add(omp.TabListItem{
 					"Last Login",
