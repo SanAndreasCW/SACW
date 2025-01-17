@@ -46,7 +46,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				player.Kick()
 				return true
 			}
-			user, err := q.InsertPlayer(ctx, database.InsertPlayerParams{
+			insertedUser, err := q.InsertPlayer(ctx, database.InsertPlayerParams{
 				Username: player.Name(),
 				Password: string(hashedPassword),
 			})
@@ -57,7 +57,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 			}
 			playerI := &commons.PlayerI{
 				Player:     player,
-				StoreModel: &user,
+				StoreModel: &insertedUser,
 			}
 			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
