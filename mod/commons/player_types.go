@@ -5,6 +5,7 @@ import (
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"sync"
 )
 
 type PlayerMembership struct {
@@ -17,6 +18,7 @@ type PlayerI struct {
 	StoreModel        *database.Player
 	CompanyMemberInfo *PlayerMembership
 	CompaniesHistory  []*CompanyMemberInfoI
+	MoneyLock         sync.RWMutex
 }
 
 type PlayerCache struct {
@@ -56,4 +58,18 @@ func (p *PlayerI) GetPlayerCompanies() []*CompanyI {
 		})
 	}
 	return companiesInfoI
+}
+
+func (p *PlayerI) GiveMoney(money int32) {
+	p.MoneyLock.Lock()
+	p.Player.GiveMoney(int(money))
+	p.StoreModel.Money = p.StoreModel.Money + money
+	p.MoneyLock.Unlock()
+}
+
+func (p *PlayerI) SetMoney(money int32) {
+	p.MoneyLock.Lock()
+	p.Player.SetMoney(int(money))
+	p.StoreModel.Money = money
+	p.MoneyLock.Unlock()
 }
