@@ -6,6 +6,7 @@ package database
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Ban struct {
@@ -23,8 +24,8 @@ type Company struct {
 	Name        string
 	Tag         string
 	Description sql.NullString
-	Balance     sql.NullInt32
-	Multiplier  sql.NullFloat64
+	Balance     int32
+	Multiplier  float32
 }
 
 type CompanyApplication struct {
@@ -33,8 +34,8 @@ type CompanyApplication struct {
 	CompanyID   int32
 	Description sql.NullString
 	Accepted    int16
-	CreatedAt   sql.NullTime
-	ExpiredAt   sql.NullTime
+	CreatedAt   time.Time
+	ExpiredAt   time.Time
 	Answer      sql.NullString
 	AnsweredAt  sql.NullTime
 }
@@ -81,7 +82,7 @@ type Player struct {
 	Language   int32
 	LastLogin  sql.NullTime
 	LastPlayed sql.NullTime
-	CreatedAt  sql.NullTime
+	CreatedAt  time.Time
 	UpdatedAt  sql.NullTime
 }
 

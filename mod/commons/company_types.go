@@ -15,11 +15,12 @@ type CompanyApplicationI struct {
 }
 
 type CompanyI struct {
-	StoreModel        *database.Company
-	Applications      []*CompanyApplicationI
-	ApplicationsMutex sync.RWMutex
-	Members           []*PlayerI
-	MembersLock       sync.RWMutex
+	StoreModel       *database.Company
+	BalanceLock      sync.Mutex
+	Applications     []*CompanyApplicationI
+	ApplicationsLock sync.RWMutex
+	Members          []*PlayerI
+	MembersLock      sync.RWMutex
 }
 
 type CompanyMemberInfoI struct {
@@ -36,7 +37,7 @@ func (ci *CompanyI) ReloadApplications() {
 	if err != nil {
 		logger.Fatal("[CompanyApplications]: Couldn't load applications: %v", err)
 	}
-	ci.ApplicationsMutex.Lock()
+	ci.ApplicationsLock.Lock()
 	ci.Applications = nil
 	for _, application := range applications {
 		ci.Applications = append(ci.Applications, &CompanyApplicationI{
@@ -44,7 +45,7 @@ func (ci *CompanyI) ReloadApplications() {
 			PlayerModel: &application.Player,
 		})
 	}
-	ci.ApplicationsMutex.Unlock()
+	ci.ApplicationsLock.Unlock()
 }
 
 func (ci *CompanyI) AnswerApplication(playerI *PlayerI, answer int16) bool {
@@ -62,8 +63,8 @@ func (ci *CompanyI) AnswerApplication(playerI *PlayerI, answer int16) bool {
 }
 
 func (ci *CompanyI) AddApplication(application *database.CompanyApplication) {
-	ci.ApplicationsMutex.Lock()
-	defer ci.ApplicationsMutex.Unlock()
+	ci.ApplicationsLock.Lock()
+	defer ci.ApplicationsLock.Unlock()
 	ci.Applications = append(ci.Applications, &CompanyApplicationI{
 		StoreModel: application,
 	})
@@ -89,4 +90,16 @@ func (ci *CompanyI) AddMember(memberI *PlayerI) {
 	ci.MembersLock.Lock()
 	ci.Members = append(ci.Members, memberI)
 	ci.MembersLock.Unlock()
+}
+
+func (ci *CompanyI) GiveBalance(balance int32) {
+	ci.BalanceLock.Lock()
+	ci.StoreModel.Balance = ci.StoreModel.Balance + balance
+	ci.BalanceLock.Unlock()
+}
+
+func (ci *CompanyI) SetBalance(balance int32) {
+	ci.BalanceLock.Lock()
+	ci.StoreModel.Balance = balance
+	ci.BalanceLock.Unlock()
 }

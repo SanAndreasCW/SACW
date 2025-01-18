@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS player
     language    INT                NOT NULL DEFAULT 0,
     last_login  TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
     last_played TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
-    created_at  TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
+    created_at  TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at  TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT _username_index UNIQUE (username)
 );
@@ -54,8 +54,8 @@ CREATE TABLE IF NOT EXISTS company
     name        VARCHAR(36) NOT NULL,
     tag         VARCHAR(3)  NOT NULL,
     description VARCHAR(80),
-    balance     INT    DEFAULT 0,
-    multiplier  float4 DEFAULT 1.0,
+    balance     INT    DEFAULT 0 NOT NULL,
+    multiplier  float4 DEFAULT 1.0 NOT NULL,
     UNIQUE (name),
     UNIQUE (tag)
 );
@@ -90,8 +90,8 @@ CREATE TABLE IF NOT EXISTS company_application
     company_id  INT                 NOT NULL,
     description VARCHAR(80)         NULL,
     accepted    int2      DEFAULT 0 NOT NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expired_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '1' DAY,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    expired_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '1' DAY NOT NULL,
     answer      VARCHAR(20)         NULL,
     answered_at TIMESTAMP           NULL,
     FOREIGN KEY (player_id) REFERENCES player (id) ON DELETE CASCADE ON UPDATE CASCADE,

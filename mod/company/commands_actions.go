@@ -85,7 +85,7 @@ func companiesHistoryAction(playerI *commons.PlayerI) {
 		companyHistory.Add(omp.TabListItem{
 			companyI.StoreModel.Name,
 			companyI.StoreModel.Tag,
-			commons.FloatToString(companyI.StoreModel.Multiplier.Float64),
+			commons.FloatToString(companyI.StoreModel.Multiplier),
 		})
 	}
 	companyHistory.ShowFor(playerI.Player)
@@ -130,8 +130,8 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 		companyApplicationsDialog.Add(omp.TabListItem{
 			commons.IntToString(playerModel.ID),
 			playerModel.Username,
-			companyApplication.StoreModel.CreatedAt.Time.Format("2006-01-02 15:04:05"),
-			companyApplication.StoreModel.ExpiredAt.Time.Format("2006-01-02 15:04:05"),
+			companyApplication.StoreModel.CreatedAt.Format("2006-01-02 15:04:05"),
+			companyApplication.StoreModel.ExpiredAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 	companyApplicationsDialog.On(omp.EventTypeDialogResponse, func(e *omp.TabListDialogResponseEvent) bool {

@@ -38,7 +38,7 @@ func companiesCommand(cmd *omp.Command) {
 		companiesDialog.Add(omp.TabListItem{
 			company.StoreModel.Name,
 			company.StoreModel.Tag,
-			commons.FloatToString(company.StoreModel.Multiplier.Float64),
+			commons.FloatToString(company.StoreModel.Multiplier),
 		})
 	}
 	companiesDialog.On(omp.EventTypeDialogResponse, func(e *omp.TabListDialogResponseEvent) bool {

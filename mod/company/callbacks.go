@@ -37,7 +37,8 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 					StoreModel: &company,
 				}
 				commons.Companies[company.ID] = companyI
-				companyI.ReloadApplications()
+				go companyI.GiveBalance(1000)
+				go companyI.ReloadApplications()
 			}
 		},
 	})
