@@ -60,6 +60,9 @@ func companyCommand(cmd *omp.Command) {
 		case "applications":
 			companyApplicationsActions(playerI)
 			return
+		case "stats":
+			playerCompanyStats(playerI)
+			return
 		}
 	}
 }

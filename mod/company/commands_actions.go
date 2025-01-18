@@ -13,13 +13,12 @@ import (
 )
 
 func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
-	if playerI.CompanyMemberInfo != nil {
-		playerI.SendClientMessage("[Company Application]: Shoma dar hale hazer ozv yek company digar hastid.", 1)
-		return
-	}
-	logger.Fatal("%v", playerI.CompanyMemberInfo)
 	for _, company := range commons.Companies {
 		if company.StoreModel.Tag == *tag {
+			if playerI.CompanyMemberInfo != nil {
+				companyStatsDialog(company).ShowFor(playerI.Player)
+				return
+			}
 			dialogBody := fmt.Sprintf(
 				"Enter company application request description for %s company.",
 				company.StoreModel.Name,
@@ -275,4 +274,40 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 		return true
 	})
 	companyApplicationsDialog.ShowFor(playerI.Player)
+}
+
+func playerCompanyStats(playerI *commons.PlayerI) {
+	companyMembership := playerI.GetCurrentCompanyMembership()
+	if companyMembership == nil {
+		playerI.SendClientMessage(
+			"[Company Applications]: You are not in a company to check incoming company applications.",
+			1,
+		)
+		return
+	}
+	companyI := commons.Companies[companyMembership.Company.StoreModel.ID]
+	statsDialog := companyStatsDialog(companyI)
+	statsDialog.ShowFor(playerI.Player)
+	return
+}
+
+func companyStatsDialog(companyI *commons.CompanyI) *omp.TabListDialog {
+	statsDialog := omp.NewTabListDialog("Company Stats", "Ok", "")
+	statsDialog.Add(omp.TabListItem{
+		"Name",
+		companyI.StoreModel.Name,
+	})
+	statsDialog.Add(omp.TabListItem{
+		"Tag",
+		companyI.StoreModel.Tag,
+	})
+	statsDialog.Add(omp.TabListItem{
+		"Balance",
+		commons.IntToString(companyI.StoreModel.Balance),
+	})
+	statsDialog.Add(omp.TabListItem{
+		"Multiplier",
+		commons.FloatToString(companyI.StoreModel.Multiplier),
+	})
+	return statsDialog
 }
