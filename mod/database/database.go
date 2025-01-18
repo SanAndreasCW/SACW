@@ -3,11 +3,9 @@ package database
 import (
 	"database/sql"
 	_ "database/sql/driver"
-
-	_ "github.com/lib/pq"
-
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
