@@ -547,10 +547,9 @@ func (q *Queries) GetUserCompanyApplicationsHistory(ctx context.Context, arg Get
 const insertCompanyApplication = `-- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)
 SELECT $1, $2, $3
-WHERE NOT EXISTS (
-    SELECT 1 FROM company_member
-    WHERE player_id = $1
-)
+WHERE NOT EXISTS (SELECT 1
+                  FROM company_member
+                  WHERE player_id = $1)
 RETURNING id, player_id, company_id, description, accepted, created_at, expired_at, answer, answered_at
 `
 
@@ -642,6 +641,24 @@ func (q *Queries) InsertPlayer(ctx context.Context, arg InsertPlayerParams) (Pla
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const updateCompany = `-- name: UpdateCompany :exec
+UPDATE company
+SET balance    = $1,
+    multiplier = $2
+WHERE id = $3
+`
+
+type UpdateCompanyParams struct {
+	Balance    int32
+	Multiplier float32
+	ID         int32
+}
+
+func (q *Queries) UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error {
+	_, err := q.db.ExecContext(ctx, updateCompany, arg.Balance, arg.Multiplier, arg.ID)
+	return err
 }
 
 const updateLastLogin = `-- name: UpdateLastLogin :exec

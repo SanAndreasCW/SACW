@@ -73,6 +73,12 @@ WHERE company_member_info.player_id = $1;
 SELECT *
 FROM company;
 
+-- name: UpdateCompany :exec
+UPDATE company
+SET balance    = $1,
+    multiplier = $2
+WHERE id = $3;
+
 -- name: GetCompanyByID :one
 SELECT *
 FROM company
@@ -138,8 +144,7 @@ WHERE player_id = $2
 -- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)
 SELECT $1, $2, $3
-WHERE NOT EXISTS (
-    SELECT 1 FROM company_member
-    WHERE player_id = $1
-)
+WHERE NOT EXISTS (SELECT 1
+                  FROM company_member
+                  WHERE player_id = $1)
 RETURNING *;

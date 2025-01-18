@@ -45,3 +45,20 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 	logger.Info("[Company]: Loaded %d companies", len(companies))
 	return true
 }
+
+func onGameModeExit(_ *omp.GameModeExitEvent) bool {
+	ctx := context.Background()
+	q := database.New(database.DB)
+	for _, company := range commons.Companies {
+		err := q.UpdateCompany(ctx, database.UpdateCompanyParams{
+			ID:         company.StoreModel.ID,
+			Multiplier: company.StoreModel.Multiplier,
+			Balance:    company.StoreModel.Balance,
+		})
+
+		if err != nil {
+			logger.Fatal("[Company]: Failed to update specific company %s: %v", company.StoreModel.Name, err)
+		}
+	}
+	return true
+}
