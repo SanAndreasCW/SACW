@@ -2,6 +2,7 @@ package commons
 
 import (
 	"context"
+	"fmt"
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
@@ -36,6 +37,7 @@ func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
 			logger.Fatal("[PlayerI] GetCurrentCompanyMembership Error:", err)
 			return nil
 		}
+		fmt.Printf("%+v\n%+v\n%+v", c.Company, Companies[c.Company.ID], Companies)
 		p.CompanyMemberInfo = &PlayerMembership{
 			Company:       Companies[c.Company.ID],
 			CompanyMember: &c.CompanyMember,

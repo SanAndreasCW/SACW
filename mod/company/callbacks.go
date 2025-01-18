@@ -8,6 +8,7 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/timer"
+	"math/rand"
 	"time"
 )
 
@@ -29,15 +30,26 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		logger.Fatal("[Company]: Failed to load companies: %v", err)
 		return true
 	}
+	for _, company := range companies {
+		companyI := &commons.CompanyI{
+			StoreModel: &company,
+		}
+		commons.Companies[company.ID] = companyI
+	}
+	timer.SetTimer(&timer.Timer{
+		Duration: time.Duration(30) * time.Minute,
+		Callback: func() {
+			for _, companyI := range commons.Companies {
+				multiplierSign := commons.If[float32](rand.Float32() > 0.5, 1.0, -1.0)
+				companyI.StoreModel.Multiplier += companyI.StoreModel.Multiplier + (multiplierSign * rand.Float32() / 10)
+			}
+		},
+	})
 	timer.SetTimer(&timer.Timer{
 		Duration: time.Duration(1) * time.Minute,
 		Callback: func() {
-			for _, company := range companies {
-				companyI := &commons.CompanyI{
-					StoreModel: &company,
-				}
-				commons.Companies[company.ID] = companyI
-				go companyI.GiveBalance(1000)
+			for _, companyI := range commons.Companies {
+				go companyI.GiveBalance(int32(1000.0 * companyI.StoreModel.Multiplier))
 				go companyI.ReloadApplications()
 			}
 		},

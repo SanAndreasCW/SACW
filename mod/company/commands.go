@@ -42,6 +42,9 @@ func companiesCommand(cmd *omp.Command) {
 		})
 	}
 	companiesDialog.On(omp.EventTypeDialogResponse, func(e *omp.TabListDialogResponseEvent) bool {
+		if e.Response == omp.DialogResponseRight {
+			return true
+		}
 		test := e.Item
 		companiesApplicationAction(playerI, &test[1])
 		return true
