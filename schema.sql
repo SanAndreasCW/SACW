@@ -59,6 +59,17 @@ CREATE TABLE IF NOT EXISTS company
     UNIQUE (name),
     UNIQUE (tag)
 );
+CREATE TABLE IF NOT EXISTS company_office
+(
+    id SERIAL PRIMARY KEY,
+    company_id INT NOT NULL UNIQUE,
+    icon_x float4 NOT NULL,
+    icon_y float4 NOT NULL,
+    pickup_x float4 NOT NULL,
+    pickup_y float4 NOT NULL,
+    pickup_z float4 NOT NULL,
+    FOREIGN KEY (company_id) REFERENCES company(id)
+);
 CREATE TABLE IF NOT EXISTS company_member
 (
     id         SERIAL PRIMARY KEY,
