@@ -32,9 +32,10 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 	}
 	for _, company := range companies {
 		companyI := &commons.CompanyI{
-			StoreModel: &company,
+			StoreModel:    &company.Company,
+			CompanyOffice: &company.CompanyOffice,
 		}
-		commons.Companies[company.ID] = companyI
+		commons.Companies[company.Company.ID] = companyI
 	}
 	timer.SetTimer(&timer.Timer{
 		Duration: time.Duration(30) * time.Minute,

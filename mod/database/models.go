@@ -58,6 +58,16 @@ type CompanyMemberInfo struct {
 	Level     int32
 }
 
+type CompanyOffice struct {
+	ID        int32
+	CompanyID int32
+	IconX     float32
+	IconY     float32
+	PickupX   float32
+	PickupY   float32
+	PickupZ   float32
+}
+
 type Player struct {
 	ID         int32
 	Username   string

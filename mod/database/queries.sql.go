@@ -42,26 +42,39 @@ func (q *Queries) DeletePlayer(ctx context.Context, id int32) error {
 }
 
 const getCompanies = `-- name: GetCompanies :many
-SELECT id, name, tag, description, balance, multiplier
+SELECT company.id, company.name, company.tag, company.description, company.balance, company.multiplier, company_office.id, company_office.company_id, company_office.icon_x, company_office.icon_y, company_office.pickup_x, company_office.pickup_y, company_office.pickup_z
 FROM company
+         JOIN company_office ON (company.id = company_office.company_id)
 `
 
-func (q *Queries) GetCompanies(ctx context.Context) ([]Company, error) {
+type GetCompaniesRow struct {
+	Company       Company
+	CompanyOffice CompanyOffice
+}
+
+func (q *Queries) GetCompanies(ctx context.Context) ([]GetCompaniesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getCompanies)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Company
+	var items []GetCompaniesRow
 	for rows.Next() {
-		var i Company
+		var i GetCompaniesRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Tag,
-			&i.Description,
-			&i.Balance,
-			&i.Multiplier,
+			&i.Company.ID,
+			&i.Company.Name,
+			&i.Company.Tag,
+			&i.Company.Description,
+			&i.Company.Balance,
+			&i.Company.Multiplier,
+			&i.CompanyOffice.ID,
+			&i.CompanyOffice.CompanyID,
+			&i.CompanyOffice.IconX,
+			&i.CompanyOffice.IconY,
+			&i.CompanyOffice.PickupX,
+			&i.CompanyOffice.PickupY,
+			&i.CompanyOffice.PickupZ,
 		); err != nil {
 			return nil, err
 		}

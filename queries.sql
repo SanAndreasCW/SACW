@@ -70,8 +70,9 @@ FROM company
 WHERE company_member_info.player_id = $1;
 
 -- name: GetCompanies :many
-SELECT *
-FROM company;
+SELECT sqlc.embed(company), sqlc.embed(company_office)
+FROM company
+         JOIN company_office ON (company.id = company_office.company_id);
 
 -- name: UpdateCompany :exec
 UPDATE company

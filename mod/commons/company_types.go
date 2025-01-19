@@ -16,6 +16,7 @@ type CompanyApplicationI struct {
 
 type CompanyI struct {
 	StoreModel       *database.Company
+	CompanyOffice    *database.CompanyOffice
 	BalanceLock      sync.Mutex
 	Applications     []*CompanyApplicationI
 	ApplicationsLock sync.RWMutex
