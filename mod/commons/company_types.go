@@ -3,6 +3,7 @@ package commons
 import (
 	"context"
 	"database/sql"
+	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
@@ -22,6 +23,7 @@ type CompanyI struct {
 	ApplicationsLock sync.RWMutex
 	Members          []*PlayerI
 	MembersLock      sync.RWMutex
+	CompanyPickup    *omp.Pickup
 }
 
 type CompanyMemberInfoI struct {

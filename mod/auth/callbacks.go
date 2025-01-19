@@ -56,8 +56,9 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				return true
 			}
 			playerI := &commons.PlayerI{
-				Player:     player,
-				StoreModel: &insertedUser,
+				Player:      player,
+				StoreModel:  &insertedUser,
+				IconCounter: 0,
 			}
 			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
@@ -91,8 +92,9 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				return true
 			}
 			playerI := &commons.PlayerI{
-				Player:     player,
-				StoreModel: &user,
+				Player:      player,
+				StoreModel:  &user,
+				IconCounter: 0,
 			}
 			playerCache.IsLoggedIn = true
 			commons.PlayersI[playerI.ID()] = playerI

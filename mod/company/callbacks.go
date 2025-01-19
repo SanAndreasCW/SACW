@@ -6,6 +6,7 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/auth"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/timer"
 	"math/rand"
@@ -16,6 +17,16 @@ func onAuthSuccess(e *auth.OnAuthSuccessEvent) bool {
 	if !e.Success {
 		return true
 	}
+	playerI := e.PlayerI
+	go func() {
+		for _, company := range commons.Companies {
+			playerI.SetMapIcon(int(playerI.NextCounter()), 52, 0, enums.MapiconLocal, omp.Vector3{
+				X: company.CompanyOffice.IconX,
+				Y: company.CompanyOffice.IconY,
+				Z: 0.0,
+			})
+		}
+	}()
 	companyMembership := e.PlayerI.GetCurrentCompanyMembership()
 	companyMembership.Company.ReloadApplications()
 	return true
@@ -31,9 +42,15 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		return true
 	}
 	for _, company := range companies {
+		pickup, _ := omp.NewPickup(1239, 1, -1, omp.Vector3{
+			X: company.CompanyOffice.PickupX,
+			Y: company.CompanyOffice.PickupY,
+			Z: company.CompanyOffice.PickupZ,
+		})
 		companyI := &commons.CompanyI{
 			StoreModel:    &company.Company,
 			CompanyOffice: &company.CompanyOffice,
+			CompanyPickup: pickup,
 		}
 		commons.Companies[company.Company.ID] = companyI
 	}

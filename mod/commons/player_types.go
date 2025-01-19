@@ -6,6 +6,7 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"sync"
+	"sync/atomic"
 )
 
 type PlayerMembership struct {
@@ -19,12 +20,19 @@ type PlayerI struct {
 	CompanyMemberInfo *PlayerMembership
 	CompaniesHistory  []*CompanyMemberInfoI
 	MoneyLock         sync.RWMutex
+	IconCounter       int32
 }
 
 type PlayerCache struct {
 	*omp.Player
 	LoginAttempts int
 	IsLoggedIn    bool
+}
+
+func (p *PlayerI) NextCounter() int32 {
+	c := p.IconCounter
+	atomic.AddInt32(&p.IconCounter, 1)
+	return c
 }
 
 func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
