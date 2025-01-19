@@ -4,6 +4,7 @@ import (
 	"github.com/RahRow/omp"
 	_ "github.com/SanAndreasCW/SACW/mod/company"
 	"github.com/SanAndreasCW/SACW/mod/database"
+	_ "github.com/SanAndreasCW/SACW/mod/dev"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	_ "github.com/joho/godotenv"
 )
