@@ -29,6 +29,14 @@ type PlayerCache struct {
 	IsLoggedIn    bool
 }
 
+func (p *PlayerI) IsInCircle(centerX, centerY, radius float32) bool {
+	playerPos := p.Position()
+	dx := playerPos.X - centerX
+	dy := playerPos.Y - centerY
+	distanceSquared := (dx * dx) + (dy * dy)
+	return distanceSquared <= radius*radius
+}
+
 func (p *PlayerI) NextCounter() int32 {
 	c := p.IconCounter
 	atomic.AddInt32(&p.IconCounter, 1)

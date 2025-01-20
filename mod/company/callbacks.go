@@ -92,3 +92,19 @@ func onGameModeExit(_ *omp.GameModeExitEvent) bool {
 	}
 	return true
 }
+
+func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
+	playerI := commons.PlayersI[e.Player.ID()]
+	keys := playerI.KeyData()
+	if keys.Keys == omp.PlayerKeyWalk {
+		for _, company := range commons.Companies {
+			pickupPosition := company.CompanyPickup.Position()
+			if playerI.IsInCircle(pickupPosition.X, pickupPosition.Y, 5.0) {
+				statsDialog := companyStatsDialog(company)
+				statsDialog.ShowFor(playerI.Player)
+				return true
+			}
+		}
+	}
+	return true
+}

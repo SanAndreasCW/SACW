@@ -13,6 +13,7 @@ func init() {
 	// Default Events
 	omp.Events.Listen(omp.EventTypeGameModeInit, onGameModeInit)
 	omp.Events.Listen(omp.EventTypeGameModeExit, onGameModeExit)
+	omp.Events.Listen(omp.EventTypePlayerKeyStateChange, onPlayerKeyStateChange)
 
 	// Commands
 	omp.Commands.Add("companies", companiesCommand)
