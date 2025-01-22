@@ -5,7 +5,6 @@ import "time"
 func SetTimer(timer *Timer) chan bool {
 	ticker := time.NewTicker(timer.Duration)
 	clearTimer := make(chan bool)
-
 	go func() {
 		for {
 			select {
