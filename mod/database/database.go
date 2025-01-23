@@ -27,5 +27,4 @@ func init() {
 		logger.Info("Database module initialized")
 		return true
 	})
-
 }

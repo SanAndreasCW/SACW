@@ -38,7 +38,6 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 	ctx := context.Background()
 	q := database.New(database.DB)
 	companies, err := q.GetCompanies(ctx)
-
 	if err != nil {
 		logger.Fatal("[Company]: Failed to load companies: %v", err)
 		return true
