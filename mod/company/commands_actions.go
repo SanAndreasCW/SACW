@@ -9,7 +9,6 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/setting"
-	"slices"
 )
 
 func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
@@ -92,14 +91,14 @@ func companiesHistoryAction(playerI *commons.PlayerI) {
 
 func companyApplicationsActions(playerI *commons.PlayerI) {
 	companyMembership := playerI.GetCurrentCompanyMembership()
-	if companyMembership == nil {
+	if !playerI.IsInCompany() {
 		playerI.SendClientMessage(
 			"[Company Applications]: You are not in a company to check incoming company applications.",
 			1,
 		)
 		return
 	}
-	if !slices.Contains(commons.CompanyApplicationPermissions, companyMembership.CompanyMember.Role) {
+	if !playerI.HasCompanyPermission(&commons.CompanyApplicationPermissions, companyMembership.CompanyMember.Role) {
 		playerI.SendClientMessage(
 			"[Company Applications]: You are not allowed to access company applications.",
 			1,
@@ -157,7 +156,6 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 					playerCompanyApplications []database.GetUserCompanyApplicationsHistoryRow
 				)
 				playerDB, err = q.GetPlayerByID(ctx, playerID)
-				logger.Fatal("%i", playerID)
 				if err != nil {
 					logger.Fatal("%v", err)
 					commons.TechnicalIssueDialog(playerI.Player)

@@ -5,6 +5,7 @@ import (
 	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"slices"
 	"sync"
 	"sync/atomic"
 )
@@ -58,6 +59,14 @@ func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
 		}
 	}
 	return p.CompanyMemberInfo
+}
+
+func (p *PlayerI) IsInCompany() bool {
+	return If(p.CompanyMemberInfo == nil, false, true)
+}
+
+func (p *PlayerI) HasCompanyPermission(permissions *[]int16, role int16) bool {
+	return If(slices.Contains(*permissions, role), true, false)
 }
 
 func (p *PlayerI) GetPlayerCompanies() []*CompanyI {

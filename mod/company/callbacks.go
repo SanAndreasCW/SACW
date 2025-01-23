@@ -28,7 +28,9 @@ func onAuthSuccess(e *auth.OnAuthSuccessEvent) bool {
 		}
 	}()
 	companyMembership := e.PlayerI.GetCurrentCompanyMembership()
-	companyMembership.Company.ReloadApplications()
+	if companyMembership != nil {
+		companyMembership.Company.ReloadApplications()
+	}
 	return true
 }
 
@@ -100,8 +102,35 @@ func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
 		for _, company := range commons.Companies {
 			pickupPosition := company.CompanyPickup.Position()
 			if playerI.IsInCircle(pickupPosition.X, pickupPosition.Y, 5.0) {
-				statsDialog := companyStatsDialog(company)
-				statsDialog.ShowFor(playerI.Player)
+				companyOptionSelectionDialog := omp.NewListDialog("Select Your Action", "Select", "Close")
+				companyOptionSelectionDialog.Add("Stats")
+				if playerI.IsInCompany() {
+					if playerI.CompanyMemberInfo.Company == company {
+						if playerI.HasCompanyPermission(
+							&commons.CompanyApplicationPermissions,
+							playerI.CompanyMemberInfo.CompanyMember.Role) {
+							companyOptionSelectionDialog.Add("Applications")
+						}
+					}
+				} else {
+					companyOptionSelectionDialog.Add("Send Application")
+				}
+				companyOptionSelectionDialog.On(omp.EventTypeDialogResponse, func(e *omp.ListDialogResponseEvent) bool {
+					switch e.Item {
+					case "Applications":
+						companyApplicationsActions(playerI)
+						return true
+					case "Stats":
+						statsDialog := companyStatsDialog(company)
+						statsDialog.ShowFor(playerI.Player)
+						return true
+					case "Send Application":
+						companiesApplicationAction(playerI, &company.StoreModel.Tag)
+						return true
+					}
+					return true
+				})
+				companyOptionSelectionDialog.ShowFor(playerI.Player)
 				return true
 			}
 		}
