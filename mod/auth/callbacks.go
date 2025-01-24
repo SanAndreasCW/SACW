@@ -127,12 +127,11 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 
 func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 	playerI := commons.PlayersI[e.Player.ID()]
-	if playerI != nil && !playerI.Cache.IsLoggedIn {
+	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
 		return true
 	}
-	player := commons.PlayersI[e.Player.ID()]
-	player.SyncPlayer()
-	player.SyncCompanyMemberInfo()
+	playerI.SyncPlayer()
+	playerI.SyncCompanyMemberInfo()
 	delete(commons.PlayersI, e.Player.ID())
 	return true
 }
@@ -144,7 +143,7 @@ func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
 
 func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 	playerI := commons.PlayersI[e.Player.ID()]
-	if !playerI.Cache.IsLoggedIn {
+	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
 		e.Player.Kick()
 		return true
 	}
