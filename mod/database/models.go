@@ -53,7 +53,6 @@ type CompanyMemberInfo struct {
 	CompanyID int32
 	Hour      int32
 	Minute    int16
-	Second    int16
 	Score     int32
 	Level     int32
 }
@@ -79,7 +78,6 @@ type Player struct {
 	Token      int32
 	Hour       int32
 	Minute     int32
-	Second     int32
 	Vip        int32
 	Helper     int32
 	IsOnline   bool

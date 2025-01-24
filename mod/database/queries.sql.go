@@ -129,7 +129,7 @@ func (q *Queries) GetCompaniesApplications(ctx context.Context) ([]CompanyApplic
 }
 
 const getCompanyApplications = `-- name: GetCompanyApplications :many
-SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answer, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.second, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at
+SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answer, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at
 FROM company_application
          JOIN player ON (company_application.player_id = player.id)
 WHERE company_application.company_id = $1
@@ -179,7 +179,6 @@ func (q *Queries) GetCompanyApplications(ctx context.Context, arg GetCompanyAppl
 			&i.Player.Token,
 			&i.Player.Hour,
 			&i.Player.Minute,
-			&i.Player.Second,
 			&i.Player.Vip,
 			&i.Player.Helper,
 			&i.Player.IsOnline,
@@ -285,7 +284,7 @@ func (q *Queries) GetCompanyMembers(ctx context.Context, companyID int32) ([]Com
 }
 
 const getCompanyMembersInfo = `-- name: GetCompanyMembersInfo :many
-SELECT id, player_id, company_id, hour, minute, second, score, level
+SELECT id, player_id, company_id, hour, minute, score, level
 FROM company_member_info
 WHERE company_id = $1
 `
@@ -305,7 +304,6 @@ func (q *Queries) GetCompanyMembersInfo(ctx context.Context, companyID int32) ([
 			&i.CompanyID,
 			&i.Hour,
 			&i.Minute,
-			&i.Second,
 			&i.Score,
 			&i.Level,
 		); err != nil {
@@ -323,7 +321,7 @@ func (q *Queries) GetCompanyMembersInfo(ctx context.Context, companyID int32) ([
 }
 
 const getPlayerByID = `-- name: GetPlayerByID :one
-SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+SELECT id, username, password, money, level, exp, gold, token, hour, minute, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 FROM player
 WHERE id = $1
 LIMIT 1
@@ -343,7 +341,6 @@ func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
 		&i.Token,
 		&i.Hour,
 		&i.Minute,
-		&i.Second,
 		&i.Vip,
 		&i.Helper,
 		&i.IsOnline,
@@ -363,7 +360,7 @@ func (q *Queries) GetPlayerByID(ctx context.Context, id int32) (Player, error) {
 }
 
 const getPlayerByUsername = `-- name: GetPlayerByUsername :one
-SELECT id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+SELECT id, username, password, money, level, exp, gold, token, hour, minute, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 FROM player
 WHERE username = $1
 LIMIT 1
@@ -383,7 +380,6 @@ func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Pla
 		&i.Token,
 		&i.Hour,
 		&i.Minute,
-		&i.Second,
 		&i.Vip,
 		&i.Helper,
 		&i.IsOnline,
@@ -471,7 +467,7 @@ func (q *Queries) GetUserCompaniesInfo(ctx context.Context, playerID int32) ([]C
 }
 
 const getUserCompanyApplicationsHistory = `-- name: GetUserCompanyApplicationsHistory :many
-SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answer, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.second, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at, company.id, company.name, company.tag, company.description, company.balance, company.multiplier
+SELECT company_application.id, company_application.player_id, company_application.company_id, company_application.description, company_application.accepted, company_application.created_at, company_application.expired_at, company_application.answer, company_application.answered_at, player.id, player.username, player.password, player.money, player.level, player.exp, player.gold, player.token, player.hour, player.minute, player.vip, player.helper, player.is_online, player.kills, player.deaths, player.pos_x, player.pos_y, player.pos_z, player.pos_angle, player.language, player.last_login, player.last_played, player.created_at, player.updated_at, company.id, company.name, company.tag, company.description, company.balance, company.multiplier
 FROM company_application
          JOIN player ON (company_application.player_id = player.id)
          JOIN company ON (company_application.company_id = company.id)
@@ -522,7 +518,6 @@ func (q *Queries) GetUserCompanyApplicationsHistory(ctx context.Context, arg Get
 			&i.Player.Token,
 			&i.Player.Hour,
 			&i.Player.Minute,
-			&i.Player.Second,
 			&i.Player.Vip,
 			&i.Player.Helper,
 			&i.Player.IsOnline,
@@ -615,7 +610,7 @@ func (q *Queries) InsertCompanyMembers(ctx context.Context, arg InsertCompanyMem
 const insertPlayer = `-- name: InsertPlayer :one
 INSERT INTO player (username, password)
 VALUES ($1, $2)
-RETURNING id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+RETURNING id, username, password, money, level, exp, gold, token, hour, minute, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 `
 
 type InsertPlayerParams struct {
@@ -637,7 +632,6 @@ func (q *Queries) InsertPlayer(ctx context.Context, arg InsertPlayerParams) (Pla
 		&i.Token,
 		&i.Hour,
 		&i.Minute,
-		&i.Second,
 		&i.Vip,
 		&i.Helper,
 		&i.IsOnline,
@@ -707,20 +701,19 @@ SET username   = $2,
     token      = $8,
     hour       = $9,
     minute     = $10,
-    second     = $11,
-    vip        = $12,
-    helper     = $13,
-    is_online  = $14,
-    kills      = $15,
-    deaths     = $16,
-    pos_x      = $17,
-    pos_y      = $18,
-    pos_z      = $19,
-    pos_angle  = $20,
-    language   = $21,
+    vip        = $11,
+    helper     = $12,
+    is_online  = $13,
+    kills      = $14,
+    deaths     = $15,
+    pos_x      = $16,
+    pos_y      = $17,
+    pos_z      = $18,
+    pos_angle  = $19,
+    language   = $20,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
-RETURNING id, username, password, money, level, exp, gold, token, hour, minute, second, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
+RETURNING id, username, password, money, level, exp, gold, token, hour, minute, vip, helper, is_online, kills, deaths, pos_x, pos_y, pos_z, pos_angle, language, last_login, last_played, created_at, updated_at
 `
 
 type UpdatePlayerParams struct {
@@ -734,7 +727,6 @@ type UpdatePlayerParams struct {
 	Token    int32
 	Hour     int32
 	Minute   int32
-	Second   int32
 	Vip      int32
 	Helper   int32
 	IsOnline bool
@@ -759,7 +751,6 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Pla
 		arg.Token,
 		arg.Hour,
 		arg.Minute,
-		arg.Second,
 		arg.Vip,
 		arg.Helper,
 		arg.IsOnline,
@@ -783,7 +774,6 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Pla
 		&i.Token,
 		&i.Hour,
 		&i.Minute,
-		&i.Second,
 		&i.Vip,
 		&i.Helper,
 		&i.IsOnline,

@@ -134,7 +134,6 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 		Token:    player.StoreModel.Token,
 		Hour:     player.StoreModel.Hour,
 		Minute:   player.StoreModel.Minute,
-		Second:   player.StoreModel.Second,
 		Vip:      player.StoreModel.Vip,
 		Helper:   player.StoreModel.Helper,
 		IsOnline: false,
