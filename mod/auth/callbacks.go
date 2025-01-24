@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/SanAndreasCW/SACW/mod/commons"
+	"github.com/SanAndreasCW/SACW/mod/timer"
 	"github.com/kodeyeen/event"
 	"time"
 
@@ -15,6 +16,24 @@ import (
 
 func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 	_, _ = omp.NewClass(255, 12, omp.Vector3{X: 0.0, Y: 0.0, Z: 0.0}, 0.0, 0, 0, 0, 0, 0, 0)
+	timer.SetTimer(&timer.Timer{
+		Duration: time.Minute * 1,
+		Callback: func() {
+			for _, playerI := range commons.PlayersI {
+				playerI.StoreModel.Minute += 1
+
+				if playerI.StoreModel.Minute >= 60 {
+					playerI.StoreModel.Hour += 1
+					playerI.StoreModel.Minute = 0
+				}
+
+				if companyMembership := playerI.GetCurrentCompanyMembership(); companyMembership != nil {
+					companyMembership.CompanyMember
+				}
+			}
+		},
+		Async: true,
+	})
 	return true
 }
 

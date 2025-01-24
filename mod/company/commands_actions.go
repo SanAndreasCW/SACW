@@ -255,7 +255,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 						if player.StoreModel.ID == playerID {
 							player.SendClientMessage("You've successfully accepted in the guild.", 1)
 							player.CompanyMemberInfo = &commons.PlayerMembership{
-								CompanyMember: &companyMember,
+								CompanyMember: &companyMember.CompanyMember,
 								Company:       company,
 							}
 							return

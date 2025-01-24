@@ -399,16 +399,18 @@ func (q *Queries) GetPlayerByUsername(ctx context.Context, username string) (Pla
 }
 
 const getUserActiveCompany = `-- name: GetUserActiveCompany :one
-SELECT company.id, company.name, company.tag, company.description, company.balance, company.multiplier, company_member.id, company_member.player_id, company_member.company_id, company_member.role
+SELECT company.id, company.name, company.tag, company.description, company.balance, company.multiplier, company_member.id, company_member.player_id, company_member.company_id, company_member.role, company_member_info.id, company_member_info.player_id, company_member_info.company_id, company_member_info.hour, company_member_info.minute, company_member_info.score, company_member_info.level
 FROM company
          JOIN company_member ON (company.id = company_member.company_id)
+         JOIN company_member_info ON (company.id = company_member_info.company_id)
 WHERE company_member.player_id = $1
 LIMIT 1
 `
 
 type GetUserActiveCompanyRow struct {
-	Company       Company
-	CompanyMember CompanyMember
+	Company           Company
+	CompanyMember     CompanyMember
+	CompanyMemberInfo CompanyMemberInfo
 }
 
 func (q *Queries) GetUserActiveCompany(ctx context.Context, playerID int32) (GetUserActiveCompanyRow, error) {
@@ -425,6 +427,13 @@ func (q *Queries) GetUserActiveCompany(ctx context.Context, playerID int32) (Get
 		&i.CompanyMember.PlayerID,
 		&i.CompanyMember.CompanyID,
 		&i.CompanyMember.Role,
+		&i.CompanyMemberInfo.ID,
+		&i.CompanyMemberInfo.PlayerID,
+		&i.CompanyMemberInfo.CompanyID,
+		&i.CompanyMemberInfo.Hour,
+		&i.CompanyMemberInfo.Minute,
+		&i.CompanyMemberInfo.Score,
+		&i.CompanyMemberInfo.Level,
 	)
 	return i, err
 }
@@ -585,9 +594,38 @@ func (q *Queries) InsertCompanyApplication(ctx context.Context, arg InsertCompan
 }
 
 const insertCompanyMembers = `-- name: InsertCompanyMembers :one
-INSERT INTO company_member (player_id, company_id)
-VALUES ($1, $2)
-RETURNING id, player_id, company_id, role
+WITH member_insert AS (
+    INSERT INTO company_member (player_id, company_id)
+        VALUES ($1, $2)
+        ON CONFLICT (player_id)
+            DO NOTHING
+        RETURNING id, player_id, company_id, role),
+     info_insert AS (
+         INSERT INTO company_member_info (player_id, company_id)
+             VALUES ($1, $2)
+             ON CONFLICT (player_id, company_id)
+                 DO NOTHING
+             RETURNING id, player_id, company_id, hour, minute, score, level)
+SELECT company_member.id, company_member.player_id, company_member.company_id, company_member.role,
+       company_member_info.id, company_member_info.player_id, company_member_info.company_id, company_member_info.hour, company_member_info.minute, company_member_info.score, company_member_info.level
+FROM (SELECT id, player_id, company_id, role
+      FROM member_insert
+      UNION ALL
+      SELECT id, player_id, company_id, role
+      FROM company_member
+      WHERE company_member.player_id = $1
+        AND company_member.company_id = $2) company_member
+         LEFT JOIN
+     (SELECT id, player_id, company_id, hour, minute, score, level
+      FROM info_insert
+      UNION ALL
+      SELECT id, player_id, company_id, hour, minute, score, level
+      FROM company_member_info
+      WHERE company_member_info.player_id = $1
+        AND company_member_info.company_id = $2) company_member_info
+     ON
+         company_member.player_id = company_member_info.player_id AND
+         company_member.company_id = company_member_info.company_id
 `
 
 type InsertCompanyMembersParams struct {
@@ -595,14 +633,26 @@ type InsertCompanyMembersParams struct {
 	CompanyID int32
 }
 
-func (q *Queries) InsertCompanyMembers(ctx context.Context, arg InsertCompanyMembersParams) (CompanyMember, error) {
+type InsertCompanyMembersRow struct {
+	CompanyMember     CompanyMember
+	CompanyMemberInfo CompanyMemberInfo
+}
+
+func (q *Queries) InsertCompanyMembers(ctx context.Context, arg InsertCompanyMembersParams) (InsertCompanyMembersRow, error) {
 	row := q.db.QueryRowContext(ctx, insertCompanyMembers, arg.PlayerID, arg.CompanyID)
-	var i CompanyMember
+	var i InsertCompanyMembersRow
 	err := row.Scan(
-		&i.ID,
-		&i.PlayerID,
-		&i.CompanyID,
-		&i.Role,
+		&i.CompanyMember.ID,
+		&i.CompanyMember.PlayerID,
+		&i.CompanyMember.CompanyID,
+		&i.CompanyMember.Role,
+		&i.CompanyMemberInfo.ID,
+		&i.CompanyMemberInfo.PlayerID,
+		&i.CompanyMemberInfo.CompanyID,
+		&i.CompanyMemberInfo.Hour,
+		&i.CompanyMemberInfo.Minute,
+		&i.CompanyMemberInfo.Score,
+		&i.CompanyMemberInfo.Level,
 	)
 	return i, err
 }

@@ -56,9 +56,10 @@ SET last_played = CURRENT_TIMESTAMP
 WHERE id = $1;
 
 -- name: GetUserActiveCompany :one
-SELECT sqlc.embed(company), sqlc.embed(company_member)
+SELECT sqlc.embed(company), sqlc.embed(company_member), sqlc.embed(company_member_info)
 FROM company
          JOIN company_member ON (company.id = company_member.company_id)
+         JOIN company_member_info ON (company.id = company_member_info.company_id)
 WHERE company_member.player_id = $1
 LIMIT 1;
 
@@ -97,9 +98,35 @@ FROM company_member
 WHERE company_id = $1;
 
 -- name: InsertCompanyMembers :one
-INSERT INTO company_member (player_id, company_id)
-VALUES ($1, $2)
-RETURNING *;
+WITH member_insert AS (
+    INSERT INTO company_member (player_id, company_id)
+        VALUES ($1, $2)
+        RETURNING *),
+     info_insert AS (
+         INSERT INTO company_member_info (player_id, company_id)
+             VALUES ($1, $2)
+             RETURNING *)
+SELECT sqlc.embed(company_member),
+       sqlc.embed(company_member_info)
+FROM (SELECT *
+      FROM member_insert
+      UNION ALL
+      SELECT *
+      FROM company_member
+      WHERE company_member.player_id = $1
+        AND company_member.company_id = $2) company_member
+         LEFT JOIN
+     (SELECT *
+      FROM info_insert
+      UNION ALL
+      SELECT *
+      FROM company_member_info
+      WHERE company_member_info.player_id = $1
+        AND company_member_info.company_id = $2) company_member_info
+     ON
+         company_member.player_id = company_member_info.player_id AND
+         company_member.company_id = company_member_info.company_id;
+
 
 -- name: GetCompanyMembersInfo :many
 SELECT *

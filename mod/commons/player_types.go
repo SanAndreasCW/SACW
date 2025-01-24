@@ -11,8 +11,9 @@ import (
 )
 
 type PlayerMembership struct {
-	Company       *CompanyI
-	CompanyMember *database.CompanyMember
+	Company           *CompanyI
+	CompanyMember     *database.CompanyMember
+	CompanyMemberInfo *database.CompanyMemberInfo
 }
 
 type PlayerI struct {
@@ -54,8 +55,9 @@ func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
 			return nil
 		}
 		p.CompanyMemberInfo = &PlayerMembership{
-			Company:       Companies[c.Company.ID],
-			CompanyMember: &c.CompanyMember,
+			Company:           Companies[c.Company.ID],
+			CompanyMember:     &c.CompanyMember,
+			CompanyMemberInfo: &c.CompanyMemberInfo,
 		}
 	}
 	return p.CompanyMemberInfo
