@@ -597,14 +597,10 @@ const insertCompanyMembers = `-- name: InsertCompanyMembers :one
 WITH member_insert AS (
     INSERT INTO company_member (player_id, company_id)
         VALUES ($1, $2)
-        ON CONFLICT (player_id)
-            DO NOTHING
         RETURNING id, player_id, company_id, role),
      info_insert AS (
          INSERT INTO company_member_info (player_id, company_id)
              VALUES ($1, $2)
-             ON CONFLICT (player_id, company_id)
-                 DO NOTHING
              RETURNING id, player_id, company_id, hour, minute, score, level)
 SELECT company_member.id, company_member.player_id, company_member.company_id, company_member.role,
        company_member_info.id, company_member_info.player_id, company_member_info.company_id, company_member_info.hour, company_member_info.minute, company_member_info.score, company_member_info.level
@@ -715,6 +711,33 @@ type UpdateCompanyParams struct {
 
 func (q *Queries) UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error {
 	_, err := q.db.ExecContext(ctx, updateCompany, arg.Balance, arg.Multiplier, arg.ID)
+	return err
+}
+
+const updateCompanyMemberInfo = `-- name: UpdateCompanyMemberInfo :exec
+UPDATE company_member_info
+SET  level = $3, hour = $4, minute = $5, score = $6
+WHERE company_id = $1 AND player_id = $2
+`
+
+type UpdateCompanyMemberInfoParams struct {
+	CompanyID int32
+	PlayerID  int32
+	Level     int32
+	Hour      int32
+	Minute    int16
+	Score     int32
+}
+
+func (q *Queries) UpdateCompanyMemberInfo(ctx context.Context, arg UpdateCompanyMemberInfoParams) error {
+	_, err := q.db.ExecContext(ctx, updateCompanyMemberInfo,
+		arg.CompanyID,
+		arg.PlayerID,
+		arg.Level,
+		arg.Hour,
+		arg.Minute,
+		arg.Score,
+	)
 	return err
 }
 
