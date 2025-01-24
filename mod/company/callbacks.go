@@ -104,10 +104,10 @@ func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
 				companyOptionSelectionDialog := omp.NewListDialog("Select Your Action", "Select", "Close")
 				companyOptionSelectionDialog.Add("Stats")
 				if playerI.IsInCompany() {
-					if playerI.CompanyMemberInfo.Company == company {
+					if playerI.Membership.Company == company {
 						if playerI.HasCompanyPermission(
 							&commons.CompanyApplicationPermissions,
-							playerI.CompanyMemberInfo.CompanyMember.Role) {
+							playerI.Membership.CompanyMember.Role) {
 							companyOptionSelectionDialog.Add("Applications")
 						}
 					}

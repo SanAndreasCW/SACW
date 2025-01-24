@@ -18,11 +18,11 @@ type PlayerMembership struct {
 
 type PlayerI struct {
 	*omp.Player
-	StoreModel        *database.Player
-	CompanyMemberInfo *PlayerMembership
-	CompaniesHistory  []*CompanyMemberInfoI
-	MoneyLock         sync.RWMutex
-	IconCounter       int32
+	StoreModel       *database.Player
+	Membership       *PlayerMembership
+	CompaniesHistory []*CompanyMemberInfoI
+	MoneyLock        sync.RWMutex
+	IconCounter      int32
 }
 
 type PlayerCache struct {
@@ -48,23 +48,23 @@ func (p *PlayerI) NextCounter() int32 {
 func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
 	ctx := context.Background()
 	q := database.New(database.DB)
-	if p.CompanyMemberInfo == nil {
+	if p.Membership == nil {
 		c, err := q.GetUserActiveCompany(ctx, p.StoreModel.ID)
 		if err != nil {
 			logger.Fatal("[PlayerI] GetCurrentCompanyMembership Error:", err)
 			return nil
 		}
-		p.CompanyMemberInfo = &PlayerMembership{
+		p.Membership = &PlayerMembership{
 			Company:           Companies[c.Company.ID],
 			CompanyMember:     &c.CompanyMember,
 			CompanyMemberInfo: &c.CompanyMemberInfo,
 		}
 	}
-	return p.CompanyMemberInfo
+	return p.Membership
 }
 
 func (p *PlayerI) IsInCompany() bool {
-	return If(p.CompanyMemberInfo == nil, false, true)
+	return If(p.Membership == nil, false, true)
 }
 
 func (p *PlayerI) HasCompanyPermission(permissions *[]int16, role int16) bool {
@@ -99,4 +99,56 @@ func (p *PlayerI) SetMoney(money int32) {
 	p.Player.SetMoney(int(money))
 	p.StoreModel.Money = money
 	p.MoneyLock.Unlock()
+}
+
+func (p *PlayerI) SyncPlayer() {
+	ctx := context.Background()
+	playerPosition := p.Position()
+	p.StoreModel.PosX = playerPosition.X
+	p.StoreModel.PosY = playerPosition.Y
+	p.StoreModel.PosZ = playerPosition.Z
+	p.StoreModel.PosAngle = p.FacingAngle()
+	q := database.New(database.DB)
+	_, err := q.UpdatePlayer(ctx, database.UpdatePlayerParams{
+		ID:       p.StoreModel.ID,
+		Username: p.Name(),
+		Password: p.StoreModel.Password,
+		Money:    p.StoreModel.Money,
+		Level:    p.StoreModel.Level,
+		Exp:      p.StoreModel.Exp,
+		Gold:     p.StoreModel.Gold,
+		Token:    p.StoreModel.Token,
+		Hour:     p.StoreModel.Hour,
+		Minute:   p.StoreModel.Minute,
+		Vip:      p.StoreModel.Vip,
+		Helper:   p.StoreModel.Helper,
+		Kills:    p.StoreModel.Kills,
+		Deaths:   p.StoreModel.Deaths,
+		PosX:     p.StoreModel.PosX,
+		PosY:     p.StoreModel.PosY,
+		PosZ:     p.StoreModel.PosZ,
+		PosAngle: p.StoreModel.PosAngle,
+		Language: p.StoreModel.Language,
+	})
+	if err != nil {
+		logger.Fatal("[Player:%s] Error updating: %v", p.Name(), err)
+	}
+}
+
+func (p *PlayerI) SyncCompanyMemberInfo() {
+	ctx := context.Background()
+	q := database.New(database.DB)
+	if p.Membership != nil {
+		err := q.UpdateCompanyMemberInfo(ctx, database.UpdateCompanyMemberInfoParams{
+			CompanyID: p.Membership.Company.StoreModel.ID,
+			PlayerID:  p.StoreModel.ID,
+			Level:     p.Membership.CompanyMemberInfo.Level,
+			Hour:      p.Membership.CompanyMemberInfo.Hour,
+			Minute:    p.Membership.CompanyMemberInfo.Minute,
+			Score:     p.Membership.CompanyMemberInfo.Score,
+		})
+		if err != nil {
+			logger.Fatal("[Player:%s] Error updating company member info: %v", p.Name(), err)
+		}
+	}
 }

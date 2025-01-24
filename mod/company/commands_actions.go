@@ -14,7 +14,7 @@ import (
 func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
 	for _, company := range commons.Companies {
 		if company.StoreModel.Tag == *tag {
-			if playerI.CompanyMemberInfo != nil {
+			if playerI.Membership != nil {
 				companyStatsDialog(company).ShowFor(playerI.Player)
 				return
 			}
@@ -254,7 +254,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 					for _, player := range commons.PlayersI {
 						if player.StoreModel.ID == playerID {
 							player.SendClientMessage("You've successfully accepted in the guild.", 1)
-							player.CompanyMemberInfo = &commons.PlayerMembership{
+							player.Membership = &commons.PlayerMembership{
 								CompanyMember: &companyMember.CompanyMember,
 								Company:       company,
 							}

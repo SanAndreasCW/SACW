@@ -28,7 +28,7 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 				}
 
 				if companyMembership := playerI.GetCurrentCompanyMembership(); companyMembership != nil {
-					companyMembership.CompanyMember
+
 				}
 			}
 		},
@@ -135,41 +135,10 @@ func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
 		return true
 	}
 	player := commons.PlayersI[e.Player.ID()]
-	ctx := context.Background()
-	playerPosition := player.Position()
-	player.StoreModel.PosX = playerPosition.X
-	player.StoreModel.PosY = playerPosition.Y
-	player.StoreModel.PosZ = playerPosition.Z
-	player.StoreModel.PosAngle = player.FacingAngle()
-	q := database.New(database.DB)
-	_, err := q.UpdatePlayer(ctx, database.UpdatePlayerParams{
-		ID:       player.StoreModel.ID,
-		Username: player.Name(),
-		Password: player.StoreModel.Password,
-		Money:    player.StoreModel.Money,
-		Level:    player.StoreModel.Level,
-		Exp:      player.StoreModel.Exp,
-		Gold:     player.StoreModel.Gold,
-		Token:    player.StoreModel.Token,
-		Hour:     player.StoreModel.Hour,
-		Minute:   player.StoreModel.Minute,
-		Vip:      player.StoreModel.Vip,
-		Helper:   player.StoreModel.Helper,
-		IsOnline: false,
-		Kills:    player.StoreModel.Kills,
-		Deaths:   player.StoreModel.Deaths,
-		PosX:     player.StoreModel.PosX,
-		PosY:     player.StoreModel.PosY,
-		PosZ:     player.StoreModel.PosZ,
-		PosAngle: player.StoreModel.PosAngle,
-		Language: player.StoreModel.Language,
-	})
+	player.SyncPlayer()
+	player.SyncCompanyMemberInfo()
 	delete(commons.PlayersI, e.Player.ID())
 	delete(commons.PlayersCache, e.Player.ID())
-	if err != nil {
-		logger.Fatal("[Player:%s] Error updating auth: %v", e.Player.Name(), err)
-		return true
-	}
 	return true
 }
 
