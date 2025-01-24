@@ -253,7 +253,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 				go func() {
 					for _, player := range commons.PlayersI {
 						if player.StoreModel.ID == playerID {
-							player.SendClientMessage("You've successfully accepted in the guild.", 1)
+							player.SendClientMessage("You've successfully accepted into company.", 1)
 							player.Membership = &commons.PlayerMembership{
 								CompanyMember: &companyMember.CompanyMember,
 								Company:       company,
