@@ -55,6 +55,11 @@ UPDATE player
 SET last_played = CURRENT_TIMESTAMP
 WHERE id = $1;
 
+-- name: UpdateCompanyMemberInfo :exec
+UPDATE company_member_info
+SET  level = $3, hour = $4, minute = $5, score = $6
+WHERE company_id = $1 AND player_id = $2;
+
 -- name: GetUserActiveCompany :one
 SELECT sqlc.embed(company), sqlc.embed(company_member), sqlc.embed(company_member_info)
 FROM company
