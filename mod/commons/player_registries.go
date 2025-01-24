@@ -5,6 +5,5 @@ import (
 )
 
 var (
-	PlayersI     = make(map[int]*PlayerI, setting.MaxPlayers)
-	PlayersCache = make(map[int]*PlayerCache, setting.MaxPlayers)
+	PlayersI = make(map[int]*PlayerI, setting.MaxPlayers)
 )

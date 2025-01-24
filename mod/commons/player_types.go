@@ -23,10 +23,10 @@ type PlayerI struct {
 	CompaniesHistory []*CompanyMemberInfoI
 	MoneyLock        sync.RWMutex
 	IconCounter      int32
+	Cache            *PlayerCache
 }
 
 type PlayerCache struct {
-	*omp.Player
 	LoginAttempts int
 	IsLoggedIn    bool
 }

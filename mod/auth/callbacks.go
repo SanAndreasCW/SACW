@@ -39,90 +39,85 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 
 func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 	argon := argon2.DefaultConfig()
-	player := e.Player
-	playerCache := &commons.PlayerCache{Player: player, LoginAttempts: 0, IsLoggedIn: false}
-	commons.PlayersCache[player.ID()] = playerCache
+	playerCache := &commons.PlayerCache{LoginAttempts: 0, IsLoggedIn: false}
+	playerI := &commons.PlayerI{
+		Player:      e.Player,
+		IconCounter: 0,
+		Cache:       playerCache,
+	}
 	q := database.New(database.DB)
 	ctx := context.Background()
-	user, err := q.GetPlayerByUsername(ctx, player.Name())
+	user, err := q.GetPlayerByUsername(ctx, playerI.Name())
 
 	if err != nil {
 		registerDialog := omp.NewInputDialog("Registration", "Please enter your password to register.", "Register", "Cancel")
-		registerDialog.ShowFor(player)
+		registerDialog.ShowFor(playerI.Player)
 		registerDialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
 			if e.Response == omp.DialogResponseRight {
-				player.Kick()
+				playerI.Kick()
 				return true
 			}
 			if len(e.InputText) < 3 {
-				player.SendClientMessage("Password must be at least 3 characters long.", 1)
-				registerDialog.ShowFor(player)
+				playerI.SendClientMessage("Password must be at least 3 characters long.", 1)
+				registerDialog.ShowFor(playerI.Player)
 				return true
 			}
 			hashedPassword, err := argon.HashEncoded([]byte(e.InputText))
 			if err != nil {
-				logger.Fatal("[Player:%s] Error hashing password: %v", player.Name(), err)
-				player.Kick()
+				logger.Fatal("[Player:%s] Error hashing password: %v", playerI.Name(), err)
+				playerI.Kick()
 				return true
 			}
 			insertedUser, err := q.InsertPlayer(ctx, database.InsertPlayerParams{
-				Username: player.Name(),
+				Username: playerI.Name(),
 				Password: string(hashedPassword),
 			})
 			if err != nil {
-				logger.Fatal("[Player:%s] Error creating user: %v", player.Name(), err)
-				player.Kick()
+				logger.Fatal("[Player:%s] Error creating user: %v", playerI.Name(), err)
+				playerI.Kick()
 				return true
 			}
-			playerI := &commons.PlayerI{
-				Player:      player,
-				StoreModel:  &insertedUser,
-				IconCounter: 0,
-			}
+			playerI.StoreModel = &insertedUser
 			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
 				Success: true,
 			})
-			player.SendClientMessage("Registration successful. Welcome to the server!", 1)
-			player.Spawn()
+			playerI.SendClientMessage("Registration successful. Welcome to the server!", 1)
+			playerI.Spawn()
 			return true
 		})
 	} else {
 		loginDialog := omp.NewPasswordDialog("Login", "Please enter your password to login.", "Login", "Cancel")
-		loginDialog.ShowFor(player)
+		loginDialog.ShowFor(playerI.Player)
 		loginDialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
 			if e.Response == omp.DialogResponseRight {
-				player.Kick()
+				playerI.Kick()
 				return true
 			}
 			verified, _ := argon2.VerifyEncoded([]byte(e.InputText), []byte(user.Password))
 			if !verified {
-				player.SendClientMessage("Incorrect password. Please try again.", 1)
+				playerI.SendClientMessage("Incorrect password. Please try again.", 1)
 				playerCache.LoginAttempts++
 				if playerCache.LoginAttempts >= 3 {
-					player.SendClientMessage("Too many failed login attempts. You've been kicked.", 1)
+					playerI.SendClientMessage("Too many failed login attempts. You've been kicked.", 1)
 					time.AfterFunc(time.Millisecond*200, func() {
-						player.Kick()
+						playerI.Kick()
 					})
 					return true
 				}
-				loginDialog.ShowFor(player)
+				loginDialog.ShowFor(playerI.Player)
 				return true
 			}
-			playerI := &commons.PlayerI{
-				Player:      player,
-				StoreModel:  &user,
-				IconCounter: 0,
-			}
+			playerI.StoreModel = &user
 			playerCache.IsLoggedIn = true
 			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
 				Success: true,
 			})
-			player.SendClientMessage("Login successful. Welcome back!", 1)
-			player.Spawn()
+			playerI.SendClientMessage("Login successful. Welcome back!", 1)
+			playerI.Spawn()
 			return true
 		})
 	}
@@ -130,15 +125,14 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 }
 
 func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
-	playerCache := commons.PlayersCache[e.Player.ID()]
-	if !playerCache.IsLoggedIn {
+	playerI := commons.PlayersI[e.Player.ID()]
+	if playerI != nil && !playerI.Cache.IsLoggedIn {
 		return true
 	}
 	player := commons.PlayersI[e.Player.ID()]
 	player.SyncPlayer()
 	player.SyncCompanyMemberInfo()
 	delete(commons.PlayersI, e.Player.ID())
-	delete(commons.PlayersCache, e.Player.ID())
 	return true
 }
 
@@ -148,12 +142,11 @@ func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
 }
 
 func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
-	playerCache := commons.PlayersCache[e.Player.ID()]
-	if !playerCache.IsLoggedIn {
+	playerI := commons.PlayersI[e.Player.ID()]
+	if !playerI.Cache.IsLoggedIn {
 		e.Player.Kick()
 		return true
 	}
-	playerI := commons.PlayersI[e.Player.ID()]
 	playerI.SetPosition(omp.Vector3{X: playerI.StoreModel.PosX, Y: playerI.StoreModel.PosY, Z: playerI.StoreModel.PosZ})
 	playerI.SetFacingAngle(playerI.StoreModel.PosAngle)
 	return true
