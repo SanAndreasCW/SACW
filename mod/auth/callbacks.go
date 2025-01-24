@@ -20,6 +20,9 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		Duration: time.Minute * 1,
 		Callback: func() {
 			for _, playerI := range commons.PlayersI {
+				if !playerI.Cache.IsLoggedIn {
+					continue
+				}
 				playerI.StoreModel.Minute += 1
 
 				if playerI.StoreModel.Minute >= 60 {
@@ -28,7 +31,12 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 				}
 
 				if companyMembership := playerI.GetCurrentCompanyMembership(); companyMembership != nil {
+					companyMembership.CompanyMemberInfo.Minute += 1
 
+					if companyMembership.CompanyMemberInfo.Minute >= 60 {
+						companyMembership.CompanyMemberInfo.Hour += 1
+						companyMembership.CompanyMemberInfo.Minute = 0
+					}
 				}
 			}
 		},
