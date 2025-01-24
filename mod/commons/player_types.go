@@ -51,7 +51,6 @@ func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
 	if p.Membership == nil {
 		c, err := q.GetUserActiveCompany(ctx, p.StoreModel.ID)
 		if err != nil {
-			logger.Fatal("[PlayerI] GetCurrentCompanyMembership Error:", err)
 			return nil
 		}
 		p.Membership = &PlayerMembership{

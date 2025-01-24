@@ -78,6 +78,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				return true
 			}
 			playerI.StoreModel = &insertedUser
+			playerI.Cache.IsLoggedIn = true
 			commons.PlayersI[playerI.ID()] = playerI
 			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
