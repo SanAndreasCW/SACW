@@ -17,6 +17,7 @@ type PlayerMembership struct {
 }
 
 type PlayerI struct {
+	Worker
 	*omp.Player
 	StoreModel       *database.Player
 	Membership       *PlayerMembership
