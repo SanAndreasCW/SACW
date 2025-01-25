@@ -21,4 +21,5 @@ type PlayerJob struct {
 	Job     *Job
 	Company *CompanyI
 	OnDuty  bool
+	Idle    bool
 }

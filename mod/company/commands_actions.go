@@ -327,6 +327,7 @@ func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 				Job:     commons.Jobs[enums.Delivery],
 				Company: company,
 				OnDuty:  true,
+				Idle:    true,
 			}
 			playerI.SendClientMessage("[Company Job]: You've hired into delivery job successfully.", 1)
 			return true
