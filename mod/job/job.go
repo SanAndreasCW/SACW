@@ -1,5 +1,8 @@
 package job
 
-func init() {
+import "github.com/RahRow/omp"
 
+func init() {
+	// Events
+	omp.Events.Listen(omp.EventTypeGameModeInit, onGameModeInit)
 }

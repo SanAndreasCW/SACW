@@ -1,6 +1,6 @@
 package enums
 
-type JobType int32
+type JobType uint32
 
 const (
 	Delivery JobType = 0

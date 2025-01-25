@@ -12,12 +12,13 @@ type Worker interface {
 }
 
 type Job struct {
-	ID     uint32
+	ID     enums.JobType
 	Name   string
 	Payout uint32
 }
 
 type PlayerJob struct {
-	Job    *Job
-	OnDuty bool
+	Job     *Job
+	Company *CompanyI
+	OnDuty  bool
 }

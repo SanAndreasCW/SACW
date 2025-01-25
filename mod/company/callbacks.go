@@ -103,6 +103,11 @@ func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
 			if playerI.IsInCircle(pickupPosition.X, pickupPosition.Y, 5.0) {
 				companyOptionSelectionDialog := omp.NewListDialog("Select Your Action", "Select", "Close")
 				companyOptionSelectionDialog.Add("Stats")
+				if playerI.Job == nil {
+					companyOptionSelectionDialog.Add("Jobs")
+				} else {
+					companyOptionSelectionDialog.Add("Abandon Job")
+				}
 				if playerI.IsInCompany() {
 					if playerI.Membership.Company == company {
 						if playerI.HasCompanyPermission(
@@ -115,6 +120,9 @@ func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
 					companyOptionSelectionDialog.Add("Send Application")
 				}
 				companyOptionSelectionDialog.On(omp.EventTypeDialogResponse, func(e *omp.ListDialogResponseEvent) bool {
+					if e.Response == omp.DialogResponseRight {
+						return true
+					}
 					switch e.Item {
 					case "Applications":
 						companyApplicationsActions(playerI)
@@ -125,6 +133,12 @@ func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
 						return true
 					case "Send Application":
 						companiesApplicationAction(playerI, &company.StoreModel.Tag)
+						return true
+					case "Jobs":
+						companiesJobsAction(playerI, company)
+						return true
+					case "Abandon Job":
+						companiesJobAbandonAction(playerI)
 						return true
 					}
 					return true

@@ -249,11 +249,11 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 					return true
 				}
 				go companyMembership.Company.ReloadApplications()
-				playerI.SendClientMessage("You've successfully accepted the application.", 1)
+				playerI.SendClientMessage("[Company Application]: You've successfully accepted the application.", 1)
 				go func() {
 					for _, player := range commons.PlayersI {
 						if player.StoreModel.ID == playerID {
-							player.SendClientMessage("You've successfully accepted into company.", 1)
+							player.SendClientMessage("[Company Application]: You've successfully accepted into company.", 1)
 							player.Membership = &commons.PlayerMembership{
 								CompanyMember: &companyMember.CompanyMember,
 								Company:       company,
@@ -308,4 +308,39 @@ func companyStatsDialog(companyI *commons.CompanyI) *omp.TabListDialog {
 		commons.FloatToString(companyI.StoreModel.Multiplier),
 	})
 	return statsDialog
+}
+
+func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
+	if playerI.Job != nil && playerI.Job.OnDuty {
+		playerI.SendClientMessage("[Company Job]: You are already on a duty.", 1)
+		return
+	}
+	companyJobsDialog := omp.NewListDialog("Company Jobs", "Select", "Close")
+	companyJobsDialog.Add("Delivery")
+	companyJobsDialog.On(omp.EventTypeDialogResponse, func(e *omp.ListDialogResponseEvent) bool {
+		if e.Response == omp.DialogResponseRight {
+			return true
+		}
+		switch e.Item {
+		case "Delivery":
+			playerI.Job = &commons.PlayerJob{
+				Job:     commons.Jobs[enums.Delivery],
+				Company: company,
+				OnDuty:  true,
+			}
+			playerI.SendClientMessage("[Company Job]: You've hired into delivery job successfully.", 1)
+			return true
+		}
+		return true
+	})
+	companyJobsDialog.ShowFor(playerI.Player)
+}
+
+func companiesJobAbandonAction(playerI *commons.PlayerI) {
+	if playerI.Job == nil && !playerI.Job.OnDuty {
+		playerI.SendClientMessage("[Company Job]: You are not on a duty.", 1)
+		return
+	}
+	playerI.Job = nil
+	playerI.SendClientMessage("[Company Job]: You've successfully left the job.", 1)
 }

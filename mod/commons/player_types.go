@@ -25,6 +25,7 @@ type PlayerI struct {
 	MoneyLock        sync.RWMutex
 	IconCounter      int32
 	Cache            *PlayerCache
+	Job              *PlayerJob
 }
 
 type PlayerCache struct {
