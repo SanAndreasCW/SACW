@@ -35,16 +35,14 @@ func onPlayerStateChange(e *omp.PlayerStateChangeEvent) bool {
 			if !slices.Contains(playerI.Job.Job.VehicleModels, playerVehicle.Model()) == true {
 				return true
 			}
-			if playerVehicle != playerI.Job.Vehicle {
-				return true
-			}
+			playerI.Job.Idle = false
 			if playerI.Job.Checkpoint != nil {
 				playerI.Job.Checkpoint.Enable()
 			}
 		}
 	} else {
 		if e.OldState == omp.PlayerStateDriver && e.NewState == omp.PlayerStateOnFoot {
-			playerI.Job.Idle = false
+			playerI.Job.Idle = true
 			if playerI.Job.Checkpoint != nil {
 				playerI.Job.Checkpoint.Disable()
 			}
