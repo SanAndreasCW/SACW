@@ -1,6 +1,9 @@
 package commons
 
-import "github.com/SanAndreasCW/SACW/mod/enums"
+import (
+	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/enums"
+)
 
 type Score int32
 
@@ -12,14 +15,24 @@ type Worker interface {
 }
 
 type Job struct {
-	ID     enums.JobType
+	ID            enums.JobType
+	Name          string
+	Payout        uint32
+	VehicleModels []omp.VehicleModel
+}
+
+type JobCargo struct {
 	Name   string
-	Payout uint32
+	Value  uint32
+	Amount uint32
 }
 
 type PlayerJob struct {
-	Job     *Job
-	Company *CompanyI
-	OnDuty  bool
-	Idle    bool
+	Job        *Job
+	Company    *CompanyI
+	Checkpoint *omp.DefaultCheckpoint
+	Cargo      *JobCargo
+	Vehicle    *omp.Vehicle
+	OnDuty     bool
+	Idle       bool
 }

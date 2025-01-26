@@ -5,6 +5,7 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"slices"
 )
 
 func onGameModeInit(e *omp.GameModeInitEvent) bool {
@@ -12,7 +13,42 @@ func onGameModeInit(e *omp.GameModeInitEvent) bool {
 		ID:     enums.Delivery,
 		Name:   "Delivery",
 		Payout: 1000,
+		VehicleModels: []omp.VehicleModel{
+			omp.VehicleModelPicador,
+		},
 	}
 	logger.Info("Job module initialized.")
+	return true
+}
+
+func onPlayerStateChange(e *omp.PlayerStateChangeEvent) bool {
+	playerI := commons.PlayersI[e.Player.ID()]
+	playerVehicle, _ := playerI.Vehicle()
+	if playerI.Job == nil {
+		return true
+	}
+	if playerI.Job.OnDuty == false {
+		return true
+	}
+	if playerI.Job.Idle == true {
+		if e.OldState == omp.PlayerStateOnFoot && (e.NewState == omp.PlayerStateDriver || e.NewState == omp.PlayerStatePassenger) {
+			if !slices.Contains(playerI.Job.Job.VehicleModels, playerVehicle.Model()) == true {
+				return true
+			}
+			if playerVehicle != playerI.Job.Vehicle {
+				return true
+			}
+			if playerI.Job.Checkpoint != nil {
+				playerI.Job.Checkpoint.Enable()
+			}
+		}
+	} else {
+		if e.OldState == omp.PlayerStateDriver && e.NewState == omp.PlayerStateOnFoot {
+			playerI.Job.Idle = false
+			if playerI.Job.Checkpoint != nil {
+				playerI.Job.Checkpoint.Disable()
+			}
+		}
+	}
 	return true
 }
