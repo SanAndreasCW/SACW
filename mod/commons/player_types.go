@@ -3,8 +3,11 @@ package commons
 import (
 	"context"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"math/rand"
 	"slices"
 	"sync"
 	"sync/atomic"
@@ -31,6 +34,20 @@ type PlayerI struct {
 type PlayerCache struct {
 	LoginAttempts int
 	IsLoggedIn    bool
+}
+
+func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
+	currentJob := Jobs[job]
+	p.Job = &PlayerJob{
+		Job:        currentJob,
+		Company:    company,
+		OnDuty:     true,
+		Idle:       true,
+		Checkpoint: p.DefaultCheckpoint(),
+	}
+	p.Job.Checkpoint.SetPosition(currentJob.CheckpointLocations[rand.Intn(len(currentJob.CheckpointLocations))])
+	p.Job.Checkpoint.SetRadius(5.0)
+	p.SendClientMessage("[Company Job]: You've hired into delivery job successfully.", colors.SuccessHex)
 }
 
 func (p *PlayerI) IsInCircle(centerX, centerY, radius float32) bool {

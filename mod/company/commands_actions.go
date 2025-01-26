@@ -324,18 +324,7 @@ func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 		}
 		switch e.Item {
 		case "Delivery":
-			playerI.Job = &commons.PlayerJob{
-				Job:        commons.Jobs[enums.Delivery],
-				Company:    company,
-				OnDuty:     true,
-				Idle:       true,
-				Checkpoint: playerI.DefaultCheckpoint(),
-			}
-			playerI.Job.Checkpoint.SetPosition(omp.Vector3{
-				X: 2233.792236, Y: -2216.103516, Z: 13.546875,
-			})
-			playerI.Job.Checkpoint.SetRadius(5.0)
-			playerI.SendClientMessage("[Company Job]: You've hired into delivery job successfully.", colors.SuccessHex)
+			playerI.JoinJob(enums.Delivery, company)
 			return true
 		}
 		return true

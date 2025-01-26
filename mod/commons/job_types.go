@@ -8,17 +8,18 @@ import (
 type Score int32
 
 type Worker interface {
-	Join(job enums.JobType) bool
-	Leave() (Job, bool)
-	SetScore(score Score) bool
-	GiveScore(score Score) bool
+	JoinJob(job enums.JobType) bool
+	LeaveJob() (Job, bool)
+	SetJobScore(score Score) bool
+	GiveJobScore(score Score) bool
 }
 
 type Job struct {
-	ID            enums.JobType
-	Name          string
-	Payout        uint32
-	VehicleModels []omp.VehicleModel
+	ID                  enums.JobType
+	Name                string
+	Payout              uint32
+	VehicleModels       []omp.VehicleModel
+	CheckpointLocations []omp.Vector3
 }
 
 type JobCargo struct {

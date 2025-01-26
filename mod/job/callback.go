@@ -16,6 +16,9 @@ func onGameModeInit(e *omp.GameModeInitEvent) bool {
 		VehicleModels: []omp.VehicleModel{
 			omp.VehicleModelPicador,
 		},
+		CheckpointLocations: []omp.Vector3{
+			omp.Vector3{X: 2233.792236, Y: -2216.103516, Z: 13.546875},
+		},
 	}
 	logger.Info("Job module initialized.")
 	return true
