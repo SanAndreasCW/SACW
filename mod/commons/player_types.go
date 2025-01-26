@@ -48,8 +48,10 @@ func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
 	p.Job.Checkpoint.SetRadius(5.0)
 }
 
-func (p *PlayerI) LeaveJob() {
+func (p *PlayerI) LeaveJob() Job {
+	job := p.Job
 	p.Job = nil
+	return *job.Job
 }
 
 func (p *PlayerI) IsInCircle(centerX, centerY, radius float32) bool {

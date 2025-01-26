@@ -9,7 +9,7 @@ const (
 func (t JobType) String() string {
 	switch t {
 	case Delivery:
-		return "delivery"
+		return "Delivery"
 	}
 	return "unknown"
 }
