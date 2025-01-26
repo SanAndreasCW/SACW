@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/enums"
@@ -40,7 +41,7 @@ func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
 				if len(company.Applications) >= setting.MaxCompanyApplications {
 					playerI.SendClientMessage(
 						"[Company Application]: Targeted company is not capable for more applications.",
-						1,
+						colors.NoteHex,
 					)
 					return true
 				}
@@ -49,13 +50,13 @@ func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
 					logger.Fatal("[CompanyApplication]: Failed to save company application")
 					playerI.SendClientMessage(
 						"[Company Application]: Shoma dar hal hazer ozv yek company hastid.",
-						1,
+						colors.ErrorHex,
 					)
 					return true
 				}
 				playerI.SendClientMessage(
 					"[Company Application]: Your application was sent successfully.",
-					1,
+					colors.SuccessHex,
 				)
 				return true
 			})
@@ -63,7 +64,7 @@ func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
 			return
 		}
 	}
-	playerI.Player.SendClientMessage("[Company Application]: Company tag not found.", 1)
+	playerI.Player.SendClientMessage("[Company Application]: Company tag not found.", colors.InfoHex)
 }
 
 func companiesHistoryAction(playerI *commons.PlayerI) {
@@ -94,14 +95,14 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 	if !playerI.IsInCompany() {
 		playerI.SendClientMessage(
 			"[Company Applications]: You are not in a company to check incoming company applications.",
-			1,
+			colors.ErrorHex,
 		)
 		return
 	}
 	if !playerI.HasCompanyPermission(&commons.CompanyApplicationPermissions, companyMembership.CompanyMember.Role) {
 		playerI.SendClientMessage(
 			"[Company Applications]: You are not allowed to access company applications.",
-			1,
+			colors.ErrorHex,
 		)
 		return
 	}
@@ -249,11 +250,11 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 					return true
 				}
 				go companyMembership.Company.ReloadApplications()
-				playerI.SendClientMessage("[Company Application]: You've successfully accepted the application.", 1)
+				playerI.SendClientMessage("[Company Application]: You've successfully accepted the application.", colors.SuccessHex)
 				go func() {
 					for _, player := range commons.PlayersI {
 						if player.StoreModel.ID == playerID {
-							player.SendClientMessage("[Company Application]: You've successfully accepted into company.", 1)
+							player.SendClientMessage("[Company Application]: You've successfully accepted into company.", colors.SuccessHex)
 							player.Membership = &commons.PlayerMembership{
 								CompanyMember: &companyMember.CompanyMember,
 								Company:       company,
@@ -279,7 +280,7 @@ func playerCompanyStats(playerI *commons.PlayerI) {
 	if companyMembership == nil {
 		playerI.SendClientMessage(
 			"[Company Applications]: You are not in a company to check incoming company applications.",
-			1,
+			colors.ErrorHex,
 		)
 		return
 	}
@@ -312,7 +313,7 @@ func companyStatsDialog(companyI *commons.CompanyI) *omp.TabListDialog {
 
 func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 	if playerI.Job != nil && playerI.Job.OnDuty {
-		playerI.SendClientMessage("[Company Job]: You are already on a duty.", 1)
+		playerI.SendClientMessage("[Company Job]: You are already on a duty.", colors.NoteHex)
 		return
 	}
 	companyJobsDialog := omp.NewListDialog("Company Jobs", "Select", "Close")
@@ -329,7 +330,7 @@ func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 				OnDuty:  true,
 				Idle:    true,
 			}
-			playerI.SendClientMessage("[Company Job]: You've hired into delivery job successfully.", 1)
+			playerI.SendClientMessage("[Company Job]: You've hired into delivery job successfully.", colors.SuccessHex)
 			return true
 		}
 		return true
@@ -339,9 +340,9 @@ func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 
 func companiesJobAbandonAction(playerI *commons.PlayerI) {
 	if playerI.Job == nil && !playerI.Job.OnDuty {
-		playerI.SendClientMessage("[Company Job]: You are not on a duty.", 1)
+		playerI.SendClientMessage("[Company Job]: You are not on a duty.", colors.ErrorHex)
 		return
 	}
 	playerI.Job = nil
-	playerI.SendClientMessage("[Company Job]: You've successfully left the job.", 1)
+	playerI.SendClientMessage("[Company Job]: You've successfully left the job.", colors.SuccessHex)
 }

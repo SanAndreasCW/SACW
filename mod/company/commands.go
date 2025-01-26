@@ -2,6 +2,7 @@ package company
 
 import (
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 )
 
@@ -25,7 +26,7 @@ func companiesCommand(cmd *omp.Command) {
 			companyApplicationsActions(playerI)
 			return
 		}
-		playerI.SendClientMessage("[Command Guide]: /companies :optional[actions] :optional[data...]", 1)
+		playerI.SendClientMessage("[Command Guide]: /companies :optional[actions] :optional[data...]", colors.InfoHex)
 		return
 	}
 	if len(commons.Companies) <= 0 {

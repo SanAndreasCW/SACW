@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/timer"
 	"github.com/kodeyeen/event"
@@ -66,7 +67,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				return true
 			}
 			if len(e.InputText) < 3 {
-				playerI.SendClientMessage("Password must be at least 3 characters long.", 1)
+				playerI.SendClientMessage("Password must be at least 3 characters long.", colors.ErrorHex)
 				registerDialog.ShowFor(playerI.Player)
 				return true
 			}
@@ -92,7 +93,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				PlayerI: playerI,
 				Success: true,
 			})
-			playerI.SendClientMessage("Registration successful. Welcome to the server!", 1)
+			playerI.SendClientMessage("Registration successful. Welcome to the server!", colors.SuccessHex)
 			playerI.Spawn()
 			return true
 		})
@@ -106,10 +107,10 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 			}
 			verified, _ := argon2.VerifyEncoded([]byte(e.InputText), []byte(user.Password))
 			if !verified {
-				playerI.SendClientMessage("Incorrect password. Please try again.", 1)
+				playerI.SendClientMessage("Incorrect password. Please try again.", colors.ErrorHex)
 				playerCache.LoginAttempts++
 				if playerCache.LoginAttempts >= 3 {
-					playerI.SendClientMessage("Too many failed login attempts. You've been kicked.", 1)
+					playerI.SendClientMessage("Too many failed login attempts. You've been kicked.", colors.ErrorHex)
 					time.AfterFunc(time.Millisecond*200, func() {
 						playerI.Kick()
 					})
@@ -125,7 +126,7 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 				PlayerI: playerI,
 				Success: true,
 			})
-			playerI.SendClientMessage("Login successful. Welcome back!", 1)
+			playerI.SendClientMessage("Login successful. Welcome back!", colors.SuccessHex)
 			playerI.Spawn()
 			return true
 		})
@@ -162,6 +163,6 @@ func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
 
 func onPlayerText(e *omp.PlayerTextEvent) bool {
 	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", e.Player.ID(), e.Player.Name(), e.Message)
-	commons.SendClientMessageToAll(msg, 0xFFFFFFFF)
+	commons.SendClientMessageToAll(msg, colors.WhiteHex)
 	return true
 }
