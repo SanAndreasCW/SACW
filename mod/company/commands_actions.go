@@ -325,6 +325,7 @@ func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 		switch e.Item {
 		case "Delivery":
 			playerI.JoinJob(enums.Delivery, company)
+			playerI.SendClientMessage(fmt.Sprintf("[Company Job]: You've hired into %s job successfully.", currentJob.Name), colors.SuccessHex)
 			return true
 		}
 		return true
@@ -337,6 +338,6 @@ func companiesJobAbandonAction(playerI *commons.PlayerI) {
 		playerI.SendClientMessage("[Company Job]: You are not on a duty.", colors.ErrorHex)
 		return
 	}
-	playerI.Job = nil
+	playerI.LeaveJob()
 	playerI.SendClientMessage("[Company Job]: You've left the job.", colors.ErrorHex)
 }

@@ -3,7 +3,6 @@ package commons
 import (
 	"context"
 	"github.com/RahRow/omp"
-	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
@@ -47,7 +46,10 @@ func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
 	}
 	p.Job.Checkpoint.SetPosition(currentJob.CheckpointLocations[rand.Intn(len(currentJob.CheckpointLocations))])
 	p.Job.Checkpoint.SetRadius(5.0)
-	p.SendClientMessage("[Company Job]: You've hired into delivery job successfully.", colors.SuccessHex)
+}
+
+func (p *PlayerI) LeaveJob() {
+	p.Job = nil
 }
 
 func (p *PlayerI) IsInCircle(centerX, centerY, radius float32) bool {
