@@ -344,5 +344,5 @@ func companiesJobAbandonAction(playerI *commons.PlayerI) {
 		return
 	}
 	playerI.Job = nil
-	playerI.SendClientMessage("[Company Job]: You've successfully left the job.", colors.SuccessHex)
+	playerI.SendClientMessage("[Company Job]: You've left the job.", colors.ErrorHex)
 }
