@@ -38,20 +38,46 @@ type PlayerCache struct {
 func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
 	currentJob := Jobs[job]
 	p.Job = &PlayerJob{
-		Job:        currentJob,
-		Company:    company,
-		OnDuty:     true,
-		Idle:       true,
-		Checkpoint: p.DefaultCheckpoint(),
+		Job:     currentJob,
+		Company: company,
+		OnDuty:  true,
+		Idle:    true,
+		Cargo: &JobCargo{
+			Name:   "Glass",
+			Amount: 1000,
+			Loaded: false,
+			Value:  1,
+		},
 	}
-	p.Job.Checkpoint.SetPosition(currentJob.CheckpointLocations[rand.Intn(len(currentJob.CheckpointLocations))])
-	p.Job.Checkpoint.SetRadius(5.0)
+	cp := p.DefaultCheckpoint()
+	cp.SetPosition(*currentJob.CheckpointLocations[rand.Intn(len(currentJob.CheckpointLocations))])
+	cp.SetRadius(5.0)
 }
 
 func (p *PlayerI) LeaveJob() Job {
 	job := p.Job
 	p.Job = nil
 	return *job.Job
+}
+
+func (p *PlayerI) SetJobCheckpoint() {
+	playerVehicle, _ := p.Vehicle()
+	if !slices.Contains(p.Job.Job.VehicleModels, playerVehicle.Model()) == true {
+		return
+	}
+	p.Job.Idle = false
+	pos := p.Position()
+	cp := p.DefaultCheckpoint()
+	if !p.Job.Cargo.Loaded {
+		cp.SetPosition(*FindNearestToPoints(&pos, p.Job.Job.LookupLocations))
+		cp.SetRadius(5.0)
+		cp.Enable()
+		return
+	} else {
+		cp.SetPosition(*FindFarthestToPoints(&pos, p.Job.Job.LookupLocations))
+		cp.SetRadius(5.0)
+		cp.Enable()
+	}
 }
 
 func (p *PlayerI) IsInCircle(centerX, centerY, radius float32) bool {

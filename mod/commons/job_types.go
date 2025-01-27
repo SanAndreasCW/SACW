@@ -19,21 +19,22 @@ type Job struct {
 	Name                string
 	Payout              uint32
 	VehicleModels       []omp.VehicleModel
-	CheckpointLocations []omp.Vector3
+	CheckpointLocations []*omp.Vector3
+	LookupLocations     []*omp.Vector3
 }
 
 type JobCargo struct {
 	Name   string
 	Value  uint32
 	Amount uint32
+	Loaded bool
 }
 
 type PlayerJob struct {
-	Job        *Job
-	Company    *CompanyI
-	Checkpoint *omp.DefaultCheckpoint
-	Cargo      *JobCargo
-	Vehicle    *omp.Vehicle
-	OnDuty     bool
-	Idle       bool
+	Job     *Job
+	Company *CompanyI
+	Cargo   *JobCargo
+	Vehicle *omp.Vehicle
+	OnDuty  bool
+	Idle    bool
 }
