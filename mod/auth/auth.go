@@ -7,12 +7,12 @@ import (
 
 func init() {
 	// Default Events
-	omp.Events.Listen(omp.EventTypeGameModeInit, onGameModeInit)
-	omp.Events.Listen(omp.EventTypePlayerSpawn, onPlayerSpawn)
-	omp.Events.Listen(omp.EventTypePlayerRequestClass, onPlayerRequestClass)
-	omp.Events.Listen(omp.EventTypePlayerConnect, onPlayerConnect)
-	omp.Events.Listen(omp.EventTypePlayerDisconnect, onPlayerDisconnect)
-	omp.Events.Listen(omp.EventTypePlayerText, onPlayerText)
+	omp.ListenFunc(omp.EventTypeGameModeInit, onGameModeInit)
+	omp.ListenFunc(omp.EventTypePlayerSpawn, onPlayerSpawn)
+	omp.ListenFunc(omp.EventTypePlayerRequestClass, onPlayerRequestClass)
+	omp.ListenFunc(omp.EventTypePlayerConnect, onPlayerConnect)
+	omp.ListenFunc(omp.EventTypePlayerDisconnect, onPlayerDisconnect)
+	omp.ListenFunc(omp.EventTypePlayerText, onPlayerText)
 	// Application Initiation Complete
 	logger.Info("Auth Module Initialized")
 }

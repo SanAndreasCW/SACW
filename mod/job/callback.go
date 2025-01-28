@@ -8,7 +8,7 @@ import (
 	"github.com/kodeyeen/omp"
 )
 
-func onGameModeInit(e *omp.GameModeInitEvent) bool {
+func onGameModeInit(_ omp.Event) bool {
 	deliveryCheckpoints := []*omp.Vector3{
 		&omp.Vector3{X: 2233.792236, Y: -2216.103516, Z: 13.546875},
 	}
