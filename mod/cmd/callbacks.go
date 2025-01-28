@@ -26,7 +26,7 @@ func onPlayerCommandText(_ context.Context, e omp.Event) error {
 	return nil
 }
 
-func onPlayerText(ctx context.Context, e omp.Event) error {
+func onPlayerText(_ context.Context, e omp.Event) error {
 	ep, ok := e.Payload().(*omp.PlayerTextEvent)
 	if ok {
 		msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", ep.Player.ID(), ep.Player.Name(), ep.Message)
