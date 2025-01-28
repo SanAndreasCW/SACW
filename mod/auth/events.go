@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/kodeyeen/event"
+	"github.com/kodeyeen/omp"
 )
 
 var (
@@ -10,7 +11,7 @@ var (
 )
 
 const (
-	EventTypeOnAuthSuccess event.Type = "onAuthSuccess"
+	EventTypeOnAuthSuccess omp.EventType = "onAuthSuccess"
 )
 
 type OnAuthSuccessEvent struct {

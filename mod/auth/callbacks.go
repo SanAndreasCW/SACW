@@ -8,13 +8,12 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/timer"
-	"github.com/kodeyeen/event"
 	"github.com/kodeyeen/omp"
 	"github.com/matthewhartstonge/argon2"
 	"time"
 )
 
-func onGameModeInit(_ *omp.GameModeInitEvent) bool {
+func onGameModeInit(ctx context.Context, _ omp.Event) error {
 	_, _ = omp.NewClass(255, 12, omp.Vector3{X: 0.0, Y: 0.0, Z: 0.0}, 0.0, 0, 0, 0, 0, 0, 0)
 	timer.SetTimer(&timer.Timer{
 		Duration: time.Minute * 1,
@@ -42,39 +41,40 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		},
 		Async: true,
 	})
-	return true
+	return nil
 }
 
-func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
+func onPlayerConnect(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerConnectEvent)
 	argon := argon2.DefaultConfig()
 	playerCache := &commons.PlayerCache{LoginAttempts: 0, IsLoggedIn: false}
 	playerI := &commons.PlayerI{
-		Player:      e.Player,
+		Player:      ep.Player,
 		IconCounter: 0,
 		Cache:       playerCache,
 	}
 	q := database.New(database.DB)
-	ctx := context.Background()
 	user, err := q.GetPlayerByUsername(ctx, playerI.Name())
 
 	if err != nil {
 		registerDialog := omp.NewInputDialog("Registration", "Please enter your password to register.", "Register", "Cancel")
 		registerDialog.ShowFor(playerI.Player)
-		registerDialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
-			if e.Response == omp.DialogResponseRight {
+		registerDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+			dep := e.Payload().(*omp.InputDialogResponseEvent)
+			if dep.Response == omp.DialogResponseRight {
 				playerI.Kick()
-				return true
+				return nil
 			}
-			if len(e.InputText) < 3 {
+			if len(dep.InputText) < 3 {
 				playerI.SendClientMessage("Password must be at least 3 characters long.", colors.ErrorHex)
 				registerDialog.ShowFor(playerI.Player)
-				return true
+				return nil
 			}
-			hashedPassword, err := argon.HashEncoded([]byte(e.InputText))
+			hashedPassword, err := argon.HashEncoded([]byte(dep.InputText))
 			if err != nil {
 				logger.Fatal("[Player:%s] Error hashing password: %v", playerI.Name(), err)
 				playerI.Kick()
-				return true
+				return nil
 			}
 			insertedUser, err := q.InsertPlayer(ctx, database.InsertPlayerParams{
 				Username: playerI.Name(),
@@ -83,28 +83,30 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 			if err != nil {
 				logger.Fatal("[Player:%s] Error creating user: %v", playerI.Name(), err)
 				playerI.Kick()
-				return true
+				return nil
 			}
 			playerI.StoreModel = &insertedUser
 			playerI.Cache.IsLoggedIn = true
 			commons.PlayersI[playerI.ID()] = playerI
-			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
+			onAuthEvent := omp.NewEvent(EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
 				Success: true,
 			})
+			_ = omp.EventListener().HandleEvent(ctx, onAuthEvent)
 			playerI.SendClientMessage("Registration successful. Welcome to the server!", colors.SuccessHex)
 			playerI.Spawn()
-			return true
+			return nil
 		})
 	} else {
 		loginDialog := omp.NewPasswordDialog("Login", "Please enter your password to login.", "Login", "Cancel")
 		loginDialog.ShowFor(playerI.Player)
-		loginDialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
-			if e.Response == omp.DialogResponseRight {
+		loginDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+			dep := e.Payload().(*omp.InputDialogResponseEvent)
+			if dep.Response == omp.DialogResponseRight {
 				playerI.Kick()
-				return true
+				return nil
 			}
-			verified, _ := argon2.VerifyEncoded([]byte(e.InputText), []byte(user.Password))
+			verified, _ := argon2.VerifyEncoded([]byte(dep.InputText), []byte(user.Password))
 			if !verified {
 				playerI.SendClientMessage("Incorrect password. Please try again.", colors.ErrorHex)
 				playerCache.LoginAttempts++
@@ -113,55 +115,60 @@ func onPlayerConnect(e *omp.PlayerConnectEvent) bool {
 					time.AfterFunc(time.Millisecond*200, func() {
 						playerI.Kick()
 					})
-					return true
+					return nil
 				}
 				loginDialog.ShowFor(playerI.Player)
-				return true
+				return nil
 			}
 			playerI.StoreModel = &user
 			playerCache.IsLoggedIn = true
 			commons.PlayersI[playerI.ID()] = playerI
-			event.Dispatch(Events, EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
+			onAuthEvent := omp.NewEvent(EventTypeOnAuthSuccess, &OnAuthSuccessEvent{
 				PlayerI: playerI,
 				Success: true,
 			})
+			_ = omp.EventListener().HandleEvent(ctx, onAuthEvent)
 			playerI.SendClientMessage("Login successful. Welcome back!", colors.SuccessHex)
 			playerI.Spawn()
-			return true
+			return nil
 		})
 	}
-	return true
+	return nil
 }
 
-func onPlayerDisconnect(e *omp.PlayerDisconnectEvent) bool {
-	playerI := commons.PlayersI[e.Player.ID()]
+func onPlayerDisconnect(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerDisconnectEvent)
+	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
-		return true
+		return nil
 	}
 	playerI.SyncPlayer()
 	playerI.SyncCompanyMemberInfo()
-	delete(commons.PlayersI, e.Player.ID())
-	return true
+	delete(commons.PlayersI, ep.Player.ID())
+	return nil
 }
 
-func onPlayerRequestClass(e *omp.PlayerRequestClassEvent) bool {
-	e.Player.Spawn()
-	return true
+func onPlayerRequestClass(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerRequestClassEvent)
+	ep.Player.Spawn()
+	return nil
 }
 
-func onPlayerSpawn(e *omp.PlayerSpawnEvent) bool {
-	playerI := commons.PlayersI[e.Player.ID()]
+func onPlayerSpawn(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerSpawnEvent)
+	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
-		e.Player.Kick()
-		return true
+		ep.Player.Kick()
+		return nil
 	}
 	playerI.SetPosition(omp.Vector3{X: playerI.StoreModel.PosX, Y: playerI.StoreModel.PosY, Z: playerI.StoreModel.PosZ})
 	playerI.SetFacingAngle(playerI.StoreModel.PosAngle)
-	return true
+	return nil
 }
 
-func onPlayerText(e *omp.PlayerTextEvent) bool {
-	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", e.Player.ID(), e.Player.Name(), e.Message)
+func onPlayerText(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerTextEvent)
+	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", ep.Player.ID(), ep.Player.Name(), ep.Message)
 	commons.SendClientMessageToAll(msg, colors.WhiteHex)
-	return true
+	return nil
 }
