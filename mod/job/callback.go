@@ -2,6 +2,7 @@ package job
 
 import (
 	"github.com/RahRow/omp"
+	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
@@ -73,10 +74,22 @@ func onPlayerEnterCheckpoint(e *omp.PlayerEnterCheckpointEvent) bool {
 	if playerI.Job.Idle {
 		return true
 	}
+	playerI.DefaultCheckpoint().Disable()
 	if playerI.Job.Cargo.Loaded {
-		//	Give Salary, Cause Reach The Destination Of Cargo
+		playerI.SendClientMessage("You've successfully delivered the cargo.", colors.SuccessHex)
+		playerI.Job.Cargo.Amount -= 1
+		playerI.GiveMoney(int32(playerI.Job.Cargo.Value * 1000))
+
+		if playerI.Job.Cargo.Amount <= 0 {
+			playerI.Job.Cargo.Loaded = false
+			playerI.SendClientMessage("You may need to reload your cargo at lookup point.", colors.NoteHex)
+		}
 	} else {
-		//  Should Load Cargo, Depends On Vehicle
+		playerI.Job.Cargo.Amount = 1
+		playerI.Job.Cargo.Loaded = true
+		playerI.SendClientMessage("You've successfully loaded the cargo.", colors.SuccessHex)
+		playerI.SendClientMessage("You've to deliver cargo to the targeted location.", colors.NoteHex)
 	}
+	playerI.SetJobCheckpoint()
 	return true
 }

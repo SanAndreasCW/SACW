@@ -44,7 +44,7 @@ func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
 		Idle:    true,
 		Cargo: &JobCargo{
 			Name:   "Glass",
-			Amount: 1000,
+			Amount: 1,
 			Loaded: false,
 			Value:  1,
 		},
@@ -74,7 +74,7 @@ func (p *PlayerI) SetJobCheckpoint() {
 		cp.Enable()
 		return
 	} else {
-		cp.SetPosition(*FindFarthestToPoints(&pos, p.Job.Job.LookupLocations))
+		cp.SetPosition(*FindFarthestToPoints(&pos, p.Job.Job.CheckpointLocations))
 		cp.SetRadius(5.0)
 		cp.Enable()
 	}
