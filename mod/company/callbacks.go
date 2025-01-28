@@ -13,11 +13,12 @@ import (
 	"time"
 )
 
-func onAuthSuccess(e *auth.OnAuthSuccessEvent) bool {
-	if !e.Success {
-		return true
+func onAuthSuccess(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*auth.OnAuthSuccessEvent)
+	if !ep.Success {
+		return nil
 	}
-	playerI := e.PlayerI
+	playerI := ep.PlayerI
 	go func() {
 		for _, company := range commons.Companies {
 			playerI.SetMapIcon(int(playerI.NextCounter()), 52, 0, enums.MapiconLocal, omp.Vector3{
@@ -27,20 +28,19 @@ func onAuthSuccess(e *auth.OnAuthSuccessEvent) bool {
 			})
 		}
 	}()
-	companyMembership := e.PlayerI.GetCurrentCompanyMembership()
+	companyMembership := ep.PlayerI.GetCurrentCompanyMembership()
 	if companyMembership != nil {
 		companyMembership.Company.ReloadApplications()
 	}
-	return true
+	return nil
 }
 
-func onGameModeInit(_ *omp.GameModeInitEvent) bool {
-	ctx := context.Background()
+func onGameModeInit(ctx context.Context, _ omp.Event) error {
 	q := database.New(database.DB)
 	companies, err := q.GetCompanies(ctx)
 	if err != nil {
 		logger.Fatal("[Company]: Failed to load companies: %v", err)
-		return true
+		return nil
 	}
 	for _, company := range companies {
 		pickup, _ := omp.NewPickup(1239, 1, -1, omp.Vector3{
@@ -74,11 +74,10 @@ func onGameModeInit(_ *omp.GameModeInitEvent) bool {
 		},
 	})
 	logger.Info("[Company]: Loaded %d companies", len(companies))
-	return true
+	return nil
 }
 
-func onGameModeExit(_ *omp.GameModeExitEvent) bool {
-	ctx := context.Background()
+func onGameModeExit(ctx context.Context, _ omp.Event) error {
 	q := database.New(database.DB)
 	for _, company := range commons.Companies {
 		err := q.UpdateCompany(ctx, database.UpdateCompanyParams{
@@ -91,11 +90,12 @@ func onGameModeExit(_ *omp.GameModeExitEvent) bool {
 			logger.Fatal("[Company]: Failed to update specific company %s: %v", company.StoreModel.Name, err)
 		}
 	}
-	return true
+	return nil
 }
 
-func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
-	playerI := commons.PlayersI[e.Player.ID()]
+func onPlayerKeyStateChange(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerKeyStateChangeEvent)
+	playerI := commons.PlayersI[ep.Player.ID()]
 	keys := playerI.KeyData()
 	if keys.Keys == omp.PlayerKeyWalk {
 		for _, company := range commons.Companies {
@@ -119,34 +119,35 @@ func onPlayerKeyStateChange(e *omp.PlayerKeyStateChangeEvent) bool {
 				} else {
 					companyOptionSelectionDialog.Add("Send Application")
 				}
-				companyOptionSelectionDialog.On(omp.EventTypeDialogResponse, func(e *omp.ListDialogResponseEvent) bool {
-					if e.Response == omp.DialogResponseRight {
-						return true
+				companyOptionSelectionDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+					ep := e.Payload().(*omp.ListDialogResponseEvent)
+					if ep.Response == omp.DialogResponseRight {
+						return nil
 					}
-					switch e.Item {
+					switch ep.Item {
 					case "Applications":
 						companyApplicationsActions(playerI)
-						return true
+						return nil
 					case "Stats":
 						statsDialog := companyStatsDialog(company)
 						statsDialog.ShowFor(playerI.Player)
-						return true
+						return nil
 					case "Send Application":
 						companiesApplicationAction(playerI, &company.StoreModel.Tag)
-						return true
+						return nil
 					case "Jobs":
 						companiesJobsAction(playerI, company)
-						return true
+						return nil
 					case "Abandon Job":
 						companiesJobAbandonAction(playerI)
-						return true
+						return nil
 					}
-					return true
+					return nil
 				})
 				companyOptionSelectionDialog.ShowFor(playerI.Player)
-				return true
+				return nil
 			}
 		}
 	}
-	return true
+	return nil
 }

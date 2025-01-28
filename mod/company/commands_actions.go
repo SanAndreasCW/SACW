@@ -29,36 +29,37 @@ func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
 				"Send",
 				"Close",
 			)
-			dialog.On(omp.EventTypeDialogResponse, func(e *omp.InputDialogResponseEvent) bool {
-				if e.Response == omp.DialogResponseRight {
-					return true
+			dialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+				ep := e.Payload().(*omp.InputDialogResponseEvent)
+				if ep.Response == omp.DialogResponseRight {
+					return nil
 				}
-				if len(e.InputText) > 80 {
+				if len(ep.InputText) > 80 {
 					dialog.Body = fmt.Sprintf("%s\nDescription can't be larger than 80 characters.", dialogBody)
 					dialog.ShowFor(playerI.Player)
-					return true
+					return nil
 				}
 				if len(company.Applications) >= setting.MaxCompanyApplications {
 					playerI.SendClientMessage(
 						"[Company Application]: Targeted company is not capable for more applications.",
 						colors.NoteHex,
 					)
-					return true
+					return nil
 				}
-				isCreated := company.CreateApplication(playerI, e.InputText)
+				isCreated := company.CreateApplication(playerI, ep.InputText)
 				if isCreated != true {
 					logger.Fatal("[CompanyApplication]: Failed to save company application")
 					playerI.SendClientMessage(
 						"[Company Application]: Shoma dar hal hazer ozv yek company hastid.",
 						colors.ErrorHex,
 					)
-					return true
+					return nil
 				}
 				playerI.SendClientMessage(
 					"[Company Application]: Your application was sent successfully.",
 					colors.SuccessHex,
 				)
-				return true
+				return nil
 			})
 			dialog.ShowFor(playerI.Player)
 			return
@@ -133,23 +134,24 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 			companyApplication.StoreModel.ExpiredAt.Format("2006-01-02 15:04:05"),
 		})
 	}
-	companyApplicationsDialog.On(omp.EventTypeDialogResponse, func(e *omp.TabListDialogResponseEvent) bool {
-		if e.Response == omp.DialogResponseRight || e.ItemNumber == 0 {
-			return true
+	companyApplicationsDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+		ep := e.Payload().(*omp.TabListDialogResponseEvent)
+		if ep.Response == omp.DialogResponseRight || ep.ItemNumber == 0 {
+			return nil
 		}
-		playerID, _ := commons.StringToInt[int32](&e.Item[0])
+		playerID, _ := commons.StringToInt[int32](&ep.Item[0])
 		applicationManagementDialog := omp.NewListDialog("Company Applications", "Select", "Close")
 		applicationManagementDialog.Add("Player Stats")
 		applicationManagementDialog.Add("Accept")
 		applicationManagementDialog.Add("Reject")
 		applicationManagementDialog.Add("Cancel")
-		applicationManagementDialog.On(omp.EventTypeDialogResponse, func(e *omp.ListDialogResponseEvent) bool {
-			if e.Response == omp.DialogResponseRight {
-				return true
+		applicationManagementDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+			ep := e.Payload().(*omp.ListDialogResponseEvent)
+			if ep.Response == omp.DialogResponseRight {
+				return nil
 			}
-			ctx := context.Background()
 			q := database.New(database.DB)
-			switch e.Item {
+			switch ep.Item {
 			case "Player Stats":
 				var (
 					playerDB                  database.Player
@@ -160,7 +162,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 				if err != nil {
 					logger.Fatal("%v", err)
 					commons.TechnicalIssueDialog(playerI.Player)
-					return true
+					return nil
 				}
 				playerCompanyApplications, err = q.GetUserCompanyApplicationsHistory(ctx, database.GetUserCompanyApplicationsHistoryParams{
 					PlayerID:  playerID,
@@ -169,7 +171,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 				if err != nil {
 					logger.Fatal("%v", err)
 					commons.TechnicalIssueDialog(playerI.Player)
-					return true
+					return nil
 				}
 				playerStatsDialog := omp.NewTabListDialog(
 					"Application Player Stats",
@@ -205,25 +207,26 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 						playerCompanyApplication.CompanyApplication.Answer.String,
 					})
 				}
-				playerStatsDialog.On(omp.EventTypeDialogResponse, func(e *omp.TabListDialogResponseEvent) bool {
-					if e.Response == omp.DialogResponseLeft {
+				playerStatsDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+					ep := e.Payload().(*omp.TabListDialogResponseEvent)
+					if ep.Response == omp.DialogResponseLeft {
 						applicationManagementDialog.ShowFor(playerI.Player)
 					}
-					return true
+					return nil
 				})
 				playerStatsDialog.ShowFor(playerI.Player)
-				return true
+				return nil
 			case "Accept", "Reject":
 				tx, _ := database.DB.Begin()
 				qtx := q.WithTx(tx)
 				err := qtx.AnswerCompanyApplication(ctx, database.AnswerCompanyApplicationParams{
 					PlayerID:  playerID,
 					CompanyID: company.StoreModel.ID,
-					Accepted:  commons.If[int16](e.Item == "Accept", enums.Accepted, enums.Rejected),
+					Accepted:  commons.If[int16](ep.Item == "Accept", enums.Accepted, enums.Rejected),
 				})
 				if err != nil {
 					commons.TechnicalIssueDialog(playerI.Player)
-					return true
+					return nil
 				}
 				failedDialog := omp.NewMessageDialog(
 					"Failed to accept application",
@@ -239,7 +242,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 					logger.Fatal("Failed to insert company member %v", err)
 					failedDialog.Body = "Player is already in another company."
 					failedDialog.ShowFor(playerI.Player)
-					return true
+					return nil
 				}
 				err = tx.Commit()
 				if err != nil {
@@ -247,7 +250,7 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 					err = tx.Rollback()
 					logger.Fatal("Failed to rollback transaction: %v", err)
 					failedDialog.ShowFor(playerI.Player)
-					return true
+					return nil
 				}
 				go companyMembership.Company.ReloadApplications()
 				playerI.SendClientMessage("[Company Application]: You've successfully accepted the application.", colors.SuccessHex)
@@ -263,14 +266,14 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 						}
 					}
 				}()
-				return true
+				return nil
 			case "Cancel":
-				return true
+				return nil
 			}
-			return true
+			return nil
 		})
 		applicationManagementDialog.ShowFor(playerI.Player)
-		return true
+		return nil
 	})
 	companyApplicationsDialog.ShowFor(playerI.Player)
 }
@@ -318,17 +321,18 @@ func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 	}
 	companyJobsDialog := omp.NewListDialog("Company Jobs", "Select", "Close")
 	companyJobsDialog.Add("Delivery")
-	companyJobsDialog.On(omp.EventTypeDialogResponse, func(e *omp.ListDialogResponseEvent) bool {
-		if e.Response == omp.DialogResponseRight {
-			return true
+	companyJobsDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
+		ep := e.Payload().(*omp.ListDialogResponseEvent)
+		if ep.Response == omp.DialogResponseRight {
+			return nil
 		}
-		switch e.Item {
+		switch ep.Item {
 		case enums.Delivery.String():
 			playerI.JoinJob(enums.Delivery, company)
 			playerI.SendClientMessage(fmt.Sprintf("[Company Job]: You've hired into %s job successfully.", enums.Delivery.String()), colors.SuccessHex)
-			return true
+			return nil
 		}
-		return true
+		return nil
 	})
 	companyJobsDialog.ShowFor(playerI.Player)
 }
