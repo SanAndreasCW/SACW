@@ -5,7 +5,7 @@ import (
 	"github.com/kodeyeen/omp"
 )
 
-func onPlayerClickMap(ctx context.Context, e omp.Event) error {
+func onPlayerClickMap(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerClickMapEvent)
 	ep.Player.SetPosition(omp.Vector3{
 		X: ep.Position.X,

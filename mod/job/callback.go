@@ -9,12 +9,12 @@ import (
 	"github.com/kodeyeen/omp"
 )
 
-func onGameModeInit(ctx context.Context, _ omp.Event) error {
+func onGameModeInit(_ context.Context, _ omp.Event) error {
 	deliveryCheckpoints := []*omp.Vector3{
-		&omp.Vector3{X: 2233.792236, Y: -2216.103516, Z: 13.546875},
+		{X: 2233.792236, Y: -2216.103516, Z: 13.546875},
 	}
 	deliveryLookups := []*omp.Vector3{
-		&omp.Vector3{X: 2181.576660, Y: -2302.060547, Z: 13.546875},
+		{X: 2181.576660, Y: -2302.060547, Z: 13.546875},
 	}
 	commons.Jobs[enums.Delivery] = &commons.Job{
 		ID:     enums.Delivery,
@@ -41,7 +41,7 @@ func onGameModeInit(ctx context.Context, _ omp.Event) error {
 	return nil
 }
 
-func onPlayerStateChange(ctx context.Context, e omp.Event) error {
+func onPlayerStateChange(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerStateChangeEvent)
 	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI.Job == nil {
@@ -65,7 +65,7 @@ func onPlayerStateChange(ctx context.Context, e omp.Event) error {
 	return nil
 }
 
-func onPlayerEnterCheckpoint(ctx context.Context, e omp.Event) error {
+func onPlayerEnterCheckpoint(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerEnterCheckpointEvent)
 	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI.Job == nil {

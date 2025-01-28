@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func onAuthSuccess(ctx context.Context, e omp.Event) error {
+func onAuthSuccess(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*auth.OnAuthSuccessEvent)
 	if !ep.Success {
 		return nil
@@ -93,7 +93,7 @@ func onGameModeExit(ctx context.Context, _ omp.Event) error {
 	return nil
 }
 
-func onPlayerKeyStateChange(ctx context.Context, e omp.Event) error {
+func onPlayerKeyStateChange(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerKeyStateChangeEvent)
 	playerI := commons.PlayersI[ep.Player.ID()]
 	keys := playerI.KeyData()
