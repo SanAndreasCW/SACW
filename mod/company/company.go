@@ -8,7 +8,7 @@ import (
 
 func init() {
 	// Auth Events
-	auth.Events.ListenFunc(auth.EventTypeOnAuthSuccess, onAuthSuccess)
+	omp.ListenFunc(auth.EventTypeOnAuthSuccess, onAuthSuccess)
 	// Default Events
 	omp.ListenFunc(omp.EventTypeGameModeInit, onGameModeInit)
 	omp.ListenFunc(omp.EventTypeGameModeExit, onGameModeExit)

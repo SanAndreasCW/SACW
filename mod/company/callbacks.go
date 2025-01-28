@@ -15,6 +15,7 @@ import (
 
 func onAuthSuccess(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*auth.OnAuthSuccessEvent)
+	logger.Debug("Auth success event")
 	if !ep.Success {
 		return nil
 	}

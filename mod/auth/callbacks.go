@@ -167,8 +167,11 @@ func onPlayerSpawn(ctx context.Context, e omp.Event) error {
 }
 
 func onPlayerText(ctx context.Context, e omp.Event) error {
-	ep := e.Payload().(*omp.PlayerTextEvent)
+	ep, ok := e.Payload().(*omp.PlayerTextEvent)
+	if !ok {
+		return commons.NewRefuse()
+	}
 	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", ep.Player.ID(), ep.Player.Name(), ep.Message)
 	commons.SendClientMessageToAll(msg, colors.WhiteHex)
-	return nil
+	return commons.NewRefuse()
 }
