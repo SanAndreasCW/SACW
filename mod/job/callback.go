@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/enums"
@@ -8,7 +9,7 @@ import (
 	"github.com/kodeyeen/omp"
 )
 
-func onGameModeInit(_ omp.Event) bool {
+func onGameModeInit(ctx context.Context, _ omp.Event) error {
 	deliveryCheckpoints := []*omp.Vector3{
 		&omp.Vector3{X: 2233.792236, Y: -2216.103516, Z: 13.546875},
 	}
@@ -37,42 +38,44 @@ func onGameModeInit(_ omp.Event) bool {
 		LookupLocations:     deliveryLookups,
 	}
 	logger.Info("Job module initialized.")
-	return true
+	return nil
 }
 
-func onPlayerStateChange(e *omp.PlayerStateChangeEvent) bool {
-	playerI := commons.PlayersI[e.Player.ID()]
+func onPlayerStateChange(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerStateChangeEvent)
+	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI.Job == nil {
-		return true
+		return nil
 	}
 	if playerI.Job.OnDuty == false {
-		return true
+		return nil
 	}
 	if playerI.Job.Idle == true {
-		if e.OldState == omp.PlayerStateOnFoot && (e.NewState == omp.PlayerStateDriver || e.NewState == omp.PlayerStatePassenger) {
+		if ep.OldState == omp.PlayerStateOnFoot && (ep.NewState == omp.PlayerStateDriver || ep.NewState == omp.PlayerStatePassenger) {
 			playerI.SetJobCheckpoint()
 		}
 	} else {
-		if e.OldState == omp.PlayerStateDriver && e.NewState == omp.PlayerStateOnFoot {
+		if ep.OldState == omp.PlayerStateDriver && ep.NewState == omp.PlayerStateOnFoot {
 			playerI.Job.Idle = true
 			if playerI.Job != nil {
 				playerI.DefaultCheckpoint().Disable()
 			}
 		}
 	}
-	return true
+	return nil
 }
 
-func onPlayerEnterCheckpoint(e *omp.PlayerEnterCheckpointEvent) bool {
-	playerI := commons.PlayersI[e.Player.ID()]
+func onPlayerEnterCheckpoint(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerEnterCheckpointEvent)
+	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI.Job == nil {
-		return true
+		return nil
 	}
 	if !playerI.Job.OnDuty {
-		return true
+		return nil
 	}
 	if playerI.Job.Idle {
-		return true
+		return nil
 	}
 	playerI.DefaultCheckpoint().Disable()
 	if playerI.Job.Cargo.Loaded {
@@ -91,5 +94,5 @@ func onPlayerEnterCheckpoint(e *omp.PlayerEnterCheckpointEvent) bool {
 		playerI.SendClientMessage("You've to deliver cargo to the targeted location.", colors.NoteHex)
 	}
 	playerI.SetJobCheckpoint()
-	return true
+	return nil
 }
