@@ -79,19 +79,19 @@ func onPlayerEnterCheckpoint(_ context.Context, e omp.Event) error {
 	}
 	playerI.DefaultCheckpoint().Disable()
 	if playerI.Job.Cargo.Loaded {
-		playerI.SendClientMessage("You've successfully delivered the cargo.", colors.SuccessHex)
+		playerI.SendClientMessage("You've successfully delivered the cargo.", colors.SuccessColor.Hex)
 		playerI.Job.Cargo.Amount -= 1
 		playerI.GiveMoney(int32(playerI.Job.Cargo.Value * 1000))
 
 		if playerI.Job.Cargo.Amount <= 0 {
 			playerI.Job.Cargo.Loaded = false
-			playerI.SendClientMessage("You may need to reload your cargo at lookup point.", colors.NoteHex)
+			playerI.SendClientMessage("You may need to reload your cargo at lookup point.", colors.NoteColor.Hex)
 		}
 	} else {
 		playerI.Job.Cargo.Amount = 1
 		playerI.Job.Cargo.Loaded = true
-		playerI.SendClientMessage("You've successfully loaded the cargo.", colors.SuccessHex)
-		playerI.SendClientMessage("You've to deliver cargo to the targeted location.", colors.NoteHex)
+		playerI.SendClientMessage("You've successfully loaded the cargo.", colors.SuccessColor.Hex)
+		playerI.SendClientMessage("You've to deliver cargo to the targeted location.", colors.NoteColor.Hex)
 	}
 	playerI.SetJobCheckpoint()
 	return nil

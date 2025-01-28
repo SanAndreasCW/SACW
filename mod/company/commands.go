@@ -28,7 +28,7 @@ func companiesCommand(cmd *cmd.Command) {
 			companyApplicationsActions(playerI)
 			return
 		}
-		playerI.SendClientMessage("[Command Guide]: /companies :optional[actions] :optional[data...]", colors.InfoHex)
+		playerI.SendClientMessage("[Command Guide]: /companies :optional[actions] :optional[data...]", colors.InfoColor.Hex)
 		return
 	}
 	if len(commons.Companies) <= 0 {

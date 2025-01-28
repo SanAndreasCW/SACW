@@ -14,7 +14,7 @@ func getPosition(cmd *cmd.Command) {
 	position := player.Position()
 	player.SendClientMessage(
 		fmt.Sprintf("position X: %f | Y: %f | Z: %f", position.X, position.Y, position.Z),
-		colors.NoticeHex,
+		colors.NoticeColor.Hex,
 	)
 	logger.Debug("position X: %f | Y: %f | Z: %f", position.X, position.Y, position.Z)
 }
@@ -26,7 +26,7 @@ func spawnVehicle(cmd *cmd.Command) {
 	playerAngle := player.FacingAngle()
 	vehicleID, err := commons.StringToInt[int32](&vehicleModel)
 	if err != nil {
-		player.SendClientMessage("[Spawn]: you've entered wrong vehicle id", colors.ErrorHex)
+		player.SendClientMessage("[Spawn]: you've entered wrong vehicle id", colors.ErrorColor.Hex)
 		return
 	}
 	veh, _ := omp.NewVehicle(omp.VehicleModel(vehicleID), omp.Vector3{
@@ -35,5 +35,5 @@ func spawnVehicle(cmd *cmd.Command) {
 		Z: playerPos.Z,
 	}, playerAngle)
 	veh.PutPlayer(player, 0)
-	player.SendClientMessage("[Spawn]: vehicle created", colors.SuccessHex)
+	player.SendClientMessage("[Spawn]: vehicle created", colors.SuccessColor.Hex)
 }

@@ -66,7 +66,7 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 				return nil
 			}
 			if len(dep.InputText) < 3 {
-				playerI.SendClientMessage("Password must be at least 3 characters long.", colors.ErrorHex)
+				playerI.SendClientMessage("Password must be at least 3 characters long.", colors.ErrorColor.Hex)
 				registerDialog.ShowFor(playerI.Player)
 				return nil
 			}
@@ -93,7 +93,7 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 				Success: true,
 			})
 			_ = omp.EventListener().HandleEvent(ctx, onAuthEvent)
-			playerI.SendClientMessage("Registration successful. Welcome to the server!", colors.SuccessHex)
+			playerI.SendClientMessage("Registration successful. Welcome to the server!", colors.SuccessColor.Hex)
 			playerI.Spawn()
 			return nil
 		})
@@ -108,10 +108,10 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 			}
 			verified, _ := argon2.VerifyEncoded([]byte(dep.InputText), []byte(user.Password))
 			if !verified {
-				playerI.SendClientMessage("Incorrect password. Please try again.", colors.ErrorHex)
+				playerI.SendClientMessage("Incorrect password. Please try again.", colors.ErrorColor.Hex)
 				playerCache.LoginAttempts++
 				if playerCache.LoginAttempts >= 3 {
-					playerI.SendClientMessage("Too many failed login attempts. You've been kicked.", colors.ErrorHex)
+					playerI.SendClientMessage("Too many failed login attempts. You've been kicked.", colors.ErrorColor.Hex)
 					time.AfterFunc(time.Millisecond*200, func() {
 						playerI.Kick()
 					})
@@ -128,7 +128,7 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 				Success: true,
 			})
 			_ = omp.EventListener().HandleEvent(ctx, onAuthEvent)
-			playerI.SendClientMessage("Login successful. Welcome back!", colors.SuccessHex)
+			playerI.SendClientMessage("Login successful. Welcome back!", colors.SuccessColor.Hex)
 			playerI.Spawn()
 			return nil
 		})
