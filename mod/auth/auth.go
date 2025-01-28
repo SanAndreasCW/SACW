@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	
 )
 
 func init() {

@@ -1,9 +1,9 @@
 package company
 
 import (
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
+	"github.com/kodeyeen/omp"
 )
 
 func companiesCommand(cmd *omp.Command) {

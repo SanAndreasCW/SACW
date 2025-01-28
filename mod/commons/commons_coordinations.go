@@ -2,7 +2,7 @@ package commons
 
 import (
 	"cmp"
-	"github.com/RahRow/omp"
+	"github.com/kodeyeen/omp"
 	"math"
 	"slices"
 )

@@ -1,11 +1,11 @@
 package job
 
 import (
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	
 )
 
 func onGameModeInit(e *omp.GameModeInitEvent) bool {

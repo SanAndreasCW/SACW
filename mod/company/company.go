@@ -1,9 +1,9 @@
 package company
 
 import (
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/auth"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/kodeyeen/omp"
 )
 
 func init() {

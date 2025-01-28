@@ -1,7 +1,7 @@
 package commons
 
 import (
-	"github.com/RahRow/omp"
+	"github.com/kodeyeen/omp"
 	"strings"
 )
 

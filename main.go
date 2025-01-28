@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/RahRow/omp"
 	_ "github.com/SanAndreasCW/SACW/mod/company"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	_ "github.com/SanAndreasCW/SACW/mod/dev"
 	_ "github.com/SanAndreasCW/SACW/mod/job"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	_ "github.com/joho/godotenv"
+	
 )
 
 func init() {

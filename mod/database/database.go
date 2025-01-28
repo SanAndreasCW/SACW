@@ -3,8 +3,8 @@ package database
 import (
 	"database/sql"
 	_ "database/sql/driver"
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/kodeyeen/
 	_ "github.com/lib/pq"
 )
 

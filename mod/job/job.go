@@ -1,6 +1,6 @@
 package job
 
-import "github.com/RahRow/omp"
+import "github.com/kodeyeen/omp"
 
 func init() {
 	// Events

@@ -9,9 +9,9 @@ import (
 	"github.com/kodeyeen/event"
 	"time"
 
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/kodeyeen/omp"
 	"github.com/matthewhartstonge/argon2"
 )
 

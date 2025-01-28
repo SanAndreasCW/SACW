@@ -2,13 +2,13 @@ package company
 
 import (
 	"context"
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/auth"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/timer"
+	"github.com
 	"math/rand"
 	"time"
 )

@@ -3,10 +3,10 @@ package commons
 import (
 	"context"
 	"database/sql"
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/kodeyeen/omp"
 	"sync"
 )
 

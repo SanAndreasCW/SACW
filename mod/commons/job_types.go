@@ -1,8 +1,8 @@
 package commons
 
 import (
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/enums"
+	"github.com/kodeyeen/omp"
 )
 
 type Score int32

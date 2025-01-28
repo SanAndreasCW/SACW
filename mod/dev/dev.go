@@ -1,6 +1,6 @@
 package dev
 
-import "github.com/RahRow/omp"
+import "github.com/kodeyeen/omp"
 
 func init() {
 	omp.Events.Listen(omp.EventTypePlayerClickMap, onPlayerClickMap)

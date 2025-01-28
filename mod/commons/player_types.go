@@ -2,10 +2,10 @@ package commons
 
 import (
 	"context"
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/kodeyeen/omp"
 	"math/rand"
 	"slices"
 	"sync"

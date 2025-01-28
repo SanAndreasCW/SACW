@@ -1,6 +1,6 @@
 package commons
 
-import "github.com/RahRow/omp"
+import "github.com/kodeyeen/omp"
 
 func TechnicalIssueDialog(player *omp.Player) {
 	messageDialog := omp.NewMessageDialog(

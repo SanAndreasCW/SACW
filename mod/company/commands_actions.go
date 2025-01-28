@@ -3,13 +3,13 @@ package company
 import (
 	"context"
 	"fmt"
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/setting"
+	"github.com/kodeyeen/omp"
 )
 
 func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {

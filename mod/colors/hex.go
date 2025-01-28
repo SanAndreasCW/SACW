@@ -1,6 +1,6 @@
 package colors
 
-import "github.com/RahRow/omp"
+import "github.com/kodeyeen/omp"
 
 const (
 	WhiteHex   omp.Color = 0xFFFFFFFF

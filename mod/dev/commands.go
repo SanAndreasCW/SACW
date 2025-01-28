@@ -2,10 +2,10 @@ package dev
 
 import (
 	"fmt"
-	"github.com/RahRow/omp"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/kodeyeen/omp"
 )
 
 func getPosition(cmd *omp.Command) {

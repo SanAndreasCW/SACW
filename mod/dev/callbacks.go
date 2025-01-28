@@ -1,6 +1,6 @@
 package dev
 
-import "github.com/RahRow/omp"
+import "github.com/kodeyeen/omp"
 
 func onPlayerClickMap(e *omp.PlayerClickMapEvent) bool {
 	e.Player.SetPosition(omp.Vector3{
