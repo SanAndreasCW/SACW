@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
-	"github.com/SanAndreasCW/SACW/mod/timer"
-	"github.com/kodeyeen/event"
-	"time"
-
 	"github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/SanAndreasCW/SACW/mod/timer"
+	"github.com/kodeyeen/event"
 	"github.com/kodeyeen/omp"
 	"github.com/matthewhartstonge/argon2"
+	"time"
 )
 
 func onGameModeInit(_ *omp.GameModeInitEvent) bool {

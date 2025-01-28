@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/SanAndreasCW/SACW/mod/logger"
-	
+	"github.com/kodeyeen/omp"
 )
 
 func init() {

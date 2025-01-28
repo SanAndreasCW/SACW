@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	_ "database/sql/driver"
 	"github.com/SanAndreasCW/SACW/mod/logger"
-	"github.com/kodeyeen/
+	"github.com/kodeyeen/omp"
 	_ "github.com/lib/pq"
 )
 

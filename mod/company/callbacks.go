@@ -8,7 +8,7 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/SanAndreasCW/SACW/mod/timer"
-	"github.com
+	"github.com/kodeyeen/omp"
 	"math/rand"
 	"time"
 )

@@ -5,7 +5,7 @@ import (
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/SanAndreasCW/SACW/mod/logger"
-	
+	"github.com/kodeyeen/omp"
 )
 
 func onGameModeInit(e *omp.GameModeInitEvent) bool {
