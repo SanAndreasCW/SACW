@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func onGameModeInit(ctx context.Context, _ omp.Event) error {
+func OnGameModeInit(ctx context.Context, _ omp.Event) error {
 	_, _ = omp.NewClass(255, 12, omp.Vector3{X: 0.0, Y: 0.0, Z: 0.0}, 0.0, 0, 0, 0, 0, 0, 0)
 	timer.SetTimer(&timer.Timer{
 		Duration: time.Minute * 1,
@@ -41,6 +41,7 @@ func onGameModeInit(ctx context.Context, _ omp.Event) error {
 		},
 		Async: true,
 	})
+	logger.Info("Auth module initialized")
 	return nil
 }
 

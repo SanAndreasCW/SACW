@@ -9,7 +9,7 @@ import (
 	"github.com/kodeyeen/omp"
 )
 
-func onGameModeInit(_ context.Context, _ omp.Event) error {
+func OnGameModeInit(_ context.Context, _ omp.Event) error {
 	deliveryCheckpoints := []*omp.Vector3{
 		{X: 2233.792236, Y: -2216.103516, Z: 13.546875},
 	}

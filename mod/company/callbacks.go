@@ -15,7 +15,6 @@ import (
 
 func onAuthSuccess(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*auth.OnAuthSuccessEvent)
-	logger.Debug("Auth success event")
 	if !ep.Success {
 		return nil
 	}
@@ -36,7 +35,7 @@ func onAuthSuccess(_ context.Context, e omp.Event) error {
 	return nil
 }
 
-func onGameModeInit(ctx context.Context, _ omp.Event) error {
+func OnGameModeInit(ctx context.Context, _ omp.Event) error {
 	q := database.New(database.DB)
 	companies, err := q.GetCompanies(ctx)
 	if err != nil {
@@ -78,7 +77,7 @@ func onGameModeInit(ctx context.Context, _ omp.Event) error {
 	return nil
 }
 
-func onGameModeExit(ctx context.Context, _ omp.Event) error {
+func OnGameModeExit(ctx context.Context, _ omp.Event) error {
 	q := database.New(database.DB)
 	for _, company := range commons.Companies {
 		err := q.UpdateCompany(ctx, database.UpdateCompanyParams{
