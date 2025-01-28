@@ -1,9 +1,12 @@
 package dev
 
-import "github.com/kodeyeen/omp"
+import (
+	"github.com/SanAndreasCW/SACW/mod/cmd"
+	"github.com/kodeyeen/omp"
+)
 
 func init() {
 	omp.ListenFunc(omp.EventTypePlayerClickMap, onPlayerClickMap)
-	//omp.Commands.Add("position", getPosition)
-	//omp.Commands.Add("spawn", spawnVehicle)
+	cmd.Commands.Add("position", getPosition)
+	cmd.Commands.Add("spawn", spawnVehicle)
 }
