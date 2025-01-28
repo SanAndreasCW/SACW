@@ -1,12 +1,16 @@
 package dev
 
-import "github.com/kodeyeen/omp"
+import (
+	"context"
+	"github.com/kodeyeen/omp"
+)
 
-func onPlayerClickMap(e *omp.PlayerClickMapEvent) bool {
-	e.Player.SetPosition(omp.Vector3{
-		X: e.Position.X,
-		Y: e.Position.Y,
-		Z: e.Position.Z,
+func onPlayerClickMap(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*omp.PlayerClickMapEvent)
+	ep.Player.SetPosition(omp.Vector3{
+		X: ep.Position.X,
+		Y: ep.Position.Y,
+		Z: ep.Position.Z,
 	})
-	return true
+	return nil
 }
