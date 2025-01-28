@@ -2,6 +2,7 @@ package company
 
 import (
 	"github.com/SanAndreasCW/SACW/mod/auth"
+	"github.com/SanAndreasCW/SACW/mod/cmd"
 	"github.com/SanAndreasCW/SACW/mod/logger"
 	"github.com/kodeyeen/omp"
 )
@@ -14,8 +15,8 @@ func init() {
 	omp.ListenFunc(omp.EventTypeGameModeExit, onGameModeExit)
 	omp.ListenFunc(omp.EventTypePlayerKeyStateChange, onPlayerKeyStateChange)
 	// Commands
-	//omp.Commands.Add("companies", companiesCommand)
-	//omp.Commands.Add("company", companyCommand)
+	cmd.Commands.Add("companies", companiesCommand)
+	cmd.Commands.Add("company", companyCommand)
 	// Module Announcement
 	logger.Info("Company module initialized")
 }

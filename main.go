@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
-	_ "github.com/SanAndreasCW/SACW/mod/company"
 	"github.com/SanAndreasCW/SACW/mod/database"
+	_ "github.com/SanAndreasCW/SACW/mod/database"
+	"github.com/SanAndreasCW/SACW/mod/logger"
+	"github.com/kodeyeen/omp"
+
+	_ "github.com/SanAndreasCW/SACW/mod/company"
 	_ "github.com/SanAndreasCW/SACW/mod/dev"
 	_ "github.com/SanAndreasCW/SACW/mod/job"
-	"github.com/SanAndreasCW/SACW/mod/logger"
 	_ "github.com/joho/godotenv"
-	"github.com/kodeyeen/omp"
 )
 
 func init() {
