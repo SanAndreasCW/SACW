@@ -1,7 +1,6 @@
 package commons
 
 import (
-	"github.com/kodeyeen/omp"
 	"strings"
 )
 
@@ -26,7 +25,7 @@ func SplitMessage(input string, limit int) *[]string {
 	return &messages
 }
 
-func SendClientMessageToAll(message string, color omp.Color) {
+func SendClientMessageToAll(message string, color uint) {
 	messages := SplitMessage(message, 143)
 	go func() {
 		for _, player := range PlayersI {
