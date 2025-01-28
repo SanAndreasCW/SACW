@@ -10,5 +10,4 @@ func init() {
 	omp.ListenFunc(omp.EventTypePlayerRequestClass, onPlayerRequestClass)
 	omp.ListenFunc(omp.EventTypePlayerConnect, onPlayerConnect)
 	omp.ListenFunc(omp.EventTypePlayerDisconnect, onPlayerDisconnect)
-	omp.ListenFunc(omp.EventTypePlayerText, onPlayerText)
 }

@@ -3,18 +3,17 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	_ "github.com/SanAndreasCW/SACW/mod/cmd"
+	_ "github.com/SanAndreasCW/SACW/mod/dev"
+
 	"github.com/SanAndreasCW/SACW/mod/auth"
 	"github.com/SanAndreasCW/SACW/mod/company"
 	"github.com/SanAndreasCW/SACW/mod/database"
-	_ "github.com/SanAndreasCW/SACW/mod/database"
 	"github.com/SanAndreasCW/SACW/mod/job"
 	"github.com/SanAndreasCW/SACW/mod/logger"
-	"github.com/kodeyeen/omp"
-
-	_ "github.com/SanAndreasCW/SACW/mod/company"
-	_ "github.com/SanAndreasCW/SACW/mod/dev"
-	_ "github.com/SanAndreasCW/SACW/mod/job"
 	_ "github.com/joho/godotenv"
+	"github.com/kodeyeen/omp"
 )
 
 func init() {
@@ -47,6 +46,10 @@ func init() {
 			}
 		}(database.DB)
 		return err
+	})
+	omp.ListenFunc(omp.EventTypePlayerCommandText, func(ctx context.Context, event omp.Event) error {
+		fmt.Println(event)
+		return nil
 	})
 }
 

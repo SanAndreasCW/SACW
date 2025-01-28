@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/database"
@@ -13,7 +12,7 @@ import (
 	"time"
 )
 
-func OnGameModeInit(ctx context.Context, _ omp.Event) error {
+func OnGameModeInit(_ context.Context, _ omp.Event) error {
 	_, _ = omp.NewClass(255, 12, omp.Vector3{X: 0.0, Y: 0.0, Z: 0.0}, 0.0, 0, 0, 0, 0, 0, 0)
 	timer.SetTimer(&timer.Timer{
 		Duration: time.Minute * 1,
@@ -137,7 +136,7 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 	return nil
 }
 
-func onPlayerDisconnect(ctx context.Context, e omp.Event) error {
+func onPlayerDisconnect(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerDisconnectEvent)
 	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
@@ -149,13 +148,13 @@ func onPlayerDisconnect(ctx context.Context, e omp.Event) error {
 	return nil
 }
 
-func onPlayerRequestClass(ctx context.Context, e omp.Event) error {
+func onPlayerRequestClass(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerRequestClassEvent)
 	ep.Player.Spawn()
 	return nil
 }
 
-func onPlayerSpawn(ctx context.Context, e omp.Event) error {
+func onPlayerSpawn(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerSpawnEvent)
 	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
@@ -165,14 +164,4 @@ func onPlayerSpawn(ctx context.Context, e omp.Event) error {
 	playerI.SetPosition(omp.Vector3{X: playerI.StoreModel.PosX, Y: playerI.StoreModel.PosY, Z: playerI.StoreModel.PosZ})
 	playerI.SetFacingAngle(playerI.StoreModel.PosAngle)
 	return nil
-}
-
-func onPlayerText(ctx context.Context, e omp.Event) error {
-	ep, ok := e.Payload().(*omp.PlayerTextEvent)
-	if !ok {
-		return commons.NewRefuse()
-	}
-	msg := fmt.Sprintf("[ID:%d|Name:%s]: %s", ep.Player.ID(), ep.Player.Name(), ep.Message)
-	commons.SendClientMessageToAll(msg, colors.WhiteHex)
-	return commons.NewRefuse()
 }
