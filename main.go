@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	_ "github.com/SanAndreasCW/SACW/mod/company"
 	"github.com/SanAndreasCW/SACW/mod/database"
 	_ "github.com/SanAndreasCW/SACW/mod/dev"
@@ -11,13 +12,13 @@ import (
 )
 
 func init() {
-	omp.ListenFunc(omp.EventTypeGameModeExit, func(event *omp.GameModeExitEvent) bool {
+	omp.ListenFunc(omp.EventTypeGameModeExit, func(ctx context.Context, event omp.Event) error {
 		logger.Info("Database connection closed")
 		err := database.DB.Close()
 		if err != nil {
 			logger.Error("Failed to close database connection: %s", err)
 		}
-		return true
+		return nil
 	})
 }
 
