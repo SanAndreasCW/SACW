@@ -26,6 +26,13 @@ CREATE TABLE IF NOT EXISTS player
     updated_at  TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT _username_index UNIQUE (username)
 );
+CREATE TABLE IF NOT EXISTS player_job
+(
+    id SERIAL PRIMARY KEY,
+    player_id INT NOT NULL,
+    job_id INT NOT NULL,
+    score INT NOT NULL DEFAULT 0
+);
 CREATE TABLE IF NOT EXISTS skin
 (
     id        SERIAL PRIMARY KEY,
