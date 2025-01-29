@@ -182,11 +182,11 @@ WHERE NOT EXISTS (SELECT 1
 RETURNING *;
 
 
--- name: GetUserJobs
+-- name: GetUserJobs :many
 SELECT * FROM player_job WHERE player_id = $1;
 
--- name: InsertUserJobs
-INSERT INTO player_job(player_id, job_id, score) VALUES ($1, $2, $3);
+-- name: InsertUserJobs :one
+INSERT INTO player_job(player_id, job_id, score) VALUES ($1, $2, $3) RETURNING *;
 
--- name: UpdateUserJobs
+-- name: UpdateUserJobs :exec
 UPDATE player_job SET score = $1 WHERE player_id = $2 AND job_id = $3;
