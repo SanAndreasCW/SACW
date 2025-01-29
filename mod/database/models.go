@@ -94,6 +94,13 @@ type Player struct {
 	UpdatedAt  sql.NullTime
 }
 
+type PlayerJob struct {
+	ID       int32
+	PlayerID int32
+	JobID    int32
+	Score    int32
+}
+
 type Skin struct {
 	ID       int32
 	PlayerID int32

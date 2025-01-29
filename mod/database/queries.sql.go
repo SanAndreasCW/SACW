@@ -561,6 +561,38 @@ func (q *Queries) GetUserCompanyApplicationsHistory(ctx context.Context, arg Get
 	return items, nil
 }
 
+const getUserJobs = `-- name: GetUserJobs :many
+SELECT id, player_id, job_id, score FROM player_job WHERE player_id = $1
+`
+
+func (q *Queries) GetUserJobs(ctx context.Context, playerID int32) ([]PlayerJob, error) {
+	rows, err := q.db.QueryContext(ctx, getUserJobs, playerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerJob
+	for rows.Next() {
+		var i PlayerJob
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlayerID,
+			&i.JobID,
+			&i.Score,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertCompanyApplication = `-- name: InsertCompanyApplication :one
 INSERT INTO company_application (player_id, company_id, description)
 SELECT $1, $2, $3
@@ -692,6 +724,28 @@ func (q *Queries) InsertPlayer(ctx context.Context, arg InsertPlayerParams) (Pla
 		&i.LastPlayed,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertUserJobs = `-- name: InsertUserJobs :one
+INSERT INTO player_job(player_id, job_id, score) VALUES ($1, $2, $3) RETURNING id, player_id, job_id, score
+`
+
+type InsertUserJobsParams struct {
+	PlayerID int32
+	JobID    int32
+	Score    int32
+}
+
+func (q *Queries) InsertUserJobs(ctx context.Context, arg InsertUserJobsParams) (PlayerJob, error) {
+	row := q.db.QueryRowContext(ctx, insertUserJobs, arg.PlayerID, arg.JobID, arg.Score)
+	var i PlayerJob
+	err := row.Scan(
+		&i.ID,
+		&i.PlayerID,
+		&i.JobID,
+		&i.Score,
 	)
 	return i, err
 }
@@ -863,4 +917,19 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Pla
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const updateUserJobs = `-- name: UpdateUserJobs :exec
+UPDATE player_job SET score = $1 WHERE player_id = $2 AND job_id = $3
+`
+
+type UpdateUserJobsParams struct {
+	Score    int32
+	PlayerID int32
+	JobID    int32
+}
+
+func (q *Queries) UpdateUserJobs(ctx context.Context, arg UpdateUserJobsParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserJobs, arg.Score, arg.PlayerID, arg.JobID)
+	return err
 }
