@@ -180,3 +180,13 @@ WHERE NOT EXISTS (SELECT 1
                   FROM company_member
                   WHERE player_id = $1)
 RETURNING *;
+
+
+-- name: GetUserJobs
+SELECT * FROM player_job WHERE player_id = $1;
+
+-- name: InsertUserJobs
+INSERT INTO player_job(player_id, job_id, score) VALUES ($1, $2, $3);
+
+-- name: UpdateUserJobs
+UPDATE player_job SET score = $1 WHERE player_id = $2 AND job_id = $3;
