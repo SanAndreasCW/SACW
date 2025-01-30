@@ -1,3 +1,24 @@
+CREATE OR REPLACE FUNCTION update_or_create_player_job(pid INT, jid INT, sc INT)
+    RETURNS player_job AS
+$$
+DECLARE
+    player_job_return player_job%ROWTYPE;
+BEGIN
+    IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = pid AND player_job.job_id = jid) THEN
+        UPDATE player_job
+        SET score = sc
+        WHERE player_job.player_id = pid
+          AND player_job.job_id = jid
+        RETURNING * INTO player_job_return;
+    ELSE
+        INSERT INTO player_job(player_id, job_id, score)
+        VALUES (pid, jid, sc)
+        RETURNING * INTO player_job_return;
+    END IF;
+    return player_job_return;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE IF NOT EXISTS player
 (
     id          SERIAL PRIMARY KEY,
@@ -28,11 +49,11 @@ CREATE TABLE IF NOT EXISTS player
 );
 CREATE TABLE IF NOT EXISTS player_job
 (
-    id SERIAL PRIMARY KEY,
+    id        SERIAL PRIMARY KEY,
     player_id INT NOT NULL,
-    job_id INT NOT NULL,
-    score INT NOT NULL DEFAULT 0,
-    FOREIGN KEY (player_id) REFERENCES player(id),
+    job_id    INT NOT NULL,
+    score     INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (player_id) REFERENCES player (id),
     UNIQUE (player_id, job_id)
 );
 CREATE TABLE IF NOT EXISTS skin
@@ -59,24 +80,24 @@ CREATE TABLE IF NOT EXISTS ban
 CREATE TABLE IF NOT EXISTS company
 (
     id          SERIAL PRIMARY KEY,
-    name        VARCHAR(36) NOT NULL,
-    tag         VARCHAR(3)  NOT NULL,
+    name        VARCHAR(36)        NOT NULL,
+    tag         VARCHAR(3)         NOT NULL,
     description VARCHAR(80),
-    balance     INT    DEFAULT 0 NOT NULL,
+    balance     INT    DEFAULT 0   NOT NULL,
     multiplier  float4 DEFAULT 1.0 NOT NULL,
     UNIQUE (name),
     UNIQUE (tag)
 );
 CREATE TABLE IF NOT EXISTS company_office
 (
-    id SERIAL PRIMARY KEY,
-    company_id INT NOT NULL UNIQUE,
-    icon_x float4 NOT NULL,
-    icon_y float4 NOT NULL,
-    pickup_x float4 NOT NULL,
-    pickup_y float4 NOT NULL,
-    pickup_z float4 NOT NULL,
-    FOREIGN KEY (company_id) REFERENCES company(id)
+    id         SERIAL PRIMARY KEY,
+    company_id INT    NOT NULL UNIQUE,
+    icon_x     float4 NOT NULL,
+    icon_y     float4 NOT NULL,
+    pickup_x   float4 NOT NULL,
+    pickup_y   float4 NOT NULL,
+    pickup_z   float4 NOT NULL,
+    FOREIGN KEY (company_id) REFERENCES company (id)
 );
 CREATE TABLE IF NOT EXISTS company_member
 (
@@ -104,14 +125,14 @@ CREATE TABLE IF NOT EXISTS company_member_info
 CREATE TABLE IF NOT EXISTS company_application
 (
     id          SERIAL PRIMARY KEY,
-    player_id   INT                 NOT NULL,
-    company_id  INT                 NOT NULL,
-    description VARCHAR(80)         NULL,
-    accepted    int2      DEFAULT 0 NOT NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    player_id   INT                                                    NOT NULL,
+    company_id  INT                                                    NOT NULL,
+    description VARCHAR(80)                                            NULL,
+    accepted    int2      DEFAULT 0                                    NOT NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP                    NOT NULL,
     expired_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '1' DAY NOT NULL,
-    answer      VARCHAR(20)         NULL,
-    answered_at TIMESTAMP           NULL,
+    answer      VARCHAR(20)                                            NULL,
+    answered_at TIMESTAMP                                              NULL,
     FOREIGN KEY (player_id) REFERENCES player (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE
 );

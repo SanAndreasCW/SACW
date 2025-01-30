@@ -898,24 +898,21 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Pla
 }
 
 const updateUserJobs = `-- name: UpdateUserJobs :one
-DO
-$$
-    BEGIN
-        IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = $1 AND player_job.job_id = $2) THEN
-            UPDATE player_job SET score = $3 WHERE player_id = $1 AND job_id = $2 RETURNING *;
-        ELSE
-            INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3) RETURNING *;
-        END IF;
-    END
-$$
+SELECT player_job.id, player_job.player_id, player_job.job_id, player_job.score FROM update_or_create_player_job(1, 1, 0) as player_job
 `
 
 type UpdateUserJobsRow struct {
+	PlayerJob PlayerJob
 }
 
 func (q *Queries) UpdateUserJobs(ctx context.Context) (UpdateUserJobsRow, error) {
 	row := q.db.QueryRowContext(ctx, updateUserJobs)
 	var i UpdateUserJobsRow
-	err := row.Scan()
+	err := row.Scan(
+		&i.PlayerJob.ID,
+		&i.PlayerJob.PlayerID,
+		&i.PlayerJob.JobID,
+		&i.PlayerJob.Score,
+	)
 	return i, err
 }
