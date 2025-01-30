@@ -185,14 +185,14 @@ RETURNING *;
 -- name: GetUserJobs :many
 SELECT * FROM player_job WHERE player_id = $1;
 
--- name: UpdateUserJobs :exec
+-- name: UpdateUserJobs :one
 DO
 $$
     BEGIN
         IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = $1 AND player_job.job_id = $2) THEN
-            UPDATE player_job SET score = $3 WHERE player_id = $1 AND job_id = $2;
+            UPDATE player_job SET score = $3 WHERE player_id = $1 AND job_id = $2 RETURNING *;
         ELSE
-            INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3);
+            INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3) RETURNING *;
         END IF;
     END
 $$;

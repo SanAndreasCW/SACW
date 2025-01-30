@@ -728,28 +728,6 @@ func (q *Queries) InsertPlayer(ctx context.Context, arg InsertPlayerParams) (Pla
 	return i, err
 }
 
-const insertUserJobs = `-- name: InsertUserJobs :one
-INSERT INTO player_job(player_id, job_id, score) VALUES ($1, $2, $3) RETURNING id, player_id, job_id, score
-`
-
-type InsertUserJobsParams struct {
-	PlayerID int32
-	JobID    int32
-	Score    int32
-}
-
-func (q *Queries) InsertUserJobs(ctx context.Context, arg InsertUserJobsParams) (PlayerJob, error) {
-	row := q.db.QueryRowContext(ctx, insertUserJobs, arg.PlayerID, arg.JobID, arg.Score)
-	var i PlayerJob
-	err := row.Scan(
-		&i.ID,
-		&i.PlayerID,
-		&i.JobID,
-		&i.Score,
-	)
-	return i, err
-}
-
 const updateCompany = `-- name: UpdateCompany :exec
 UPDATE company
 SET balance    = $1,
@@ -919,20 +897,25 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Pla
 	return i, err
 }
 
-const updateUserJobs = `-- name: UpdateUserJobs :exec
+const updateUserJobs = `-- name: UpdateUserJobs :one
 DO
 $$
     BEGIN
         IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = $1 AND player_job.job_id = $2) THEN
-            UPDATE player_job SET score = $3 WHERE player_id = $1 AND job_id = $2;
+            UPDATE player_job SET score = $3 WHERE player_id = $1 AND job_id = $2 RETURNING *;
         ELSE
-            INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3);
+            INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3) RETURNING *;
         END IF;
     END
 $$
 `
 
-func (q *Queries) UpdateUserJobs(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, updateUserJobs)
-	return err
+type UpdateUserJobsRow struct {
+}
+
+func (q *Queries) UpdateUserJobs(ctx context.Context) (UpdateUserJobsRow, error) {
+	row := q.db.QueryRowContext(ctx, updateUserJobs)
+	var i UpdateUserJobsRow
+	err := row.Scan()
+	return i, err
 }
