@@ -198,4 +198,4 @@ $$
             INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3);
         END IF;
     END
-$$
+$$;

@@ -920,16 +920,19 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Pla
 }
 
 const updateUserJobs = `-- name: UpdateUserJobs :exec
-UPDATE player_job SET score = $1 WHERE player_id = $2 AND job_id = $3
+DO
+$$
+    BEGIN
+        IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = $1 AND player_job.job_id = $2) THEN
+            UPDATE player_job SET score = $3 WHERE player_id = $1 AND job_id = $2;
+        ELSE
+            INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3);
+        END IF;
+    END
+$$
 `
 
-type UpdateUserJobsParams struct {
-	Score    int32
-	PlayerID int32
-	JobID    int32
-}
-
-func (q *Queries) UpdateUserJobs(ctx context.Context, arg UpdateUserJobsParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserJobs, arg.Score, arg.PlayerID, arg.JobID)
+func (q *Queries) UpdateUserJobs(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, updateUserJobs)
 	return err
 }
