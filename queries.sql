@@ -189,4 +189,13 @@ SELECT * FROM player_job WHERE player_id = $1;
 INSERT INTO player_job(player_id, job_id, score) VALUES ($1, $2, $3) RETURNING *;
 
 -- name: UpdateUserJobs :exec
-UPDATE player_job SET score = $1 WHERE player_id = $2 AND job_id = $3;
+DO
+$$
+    BEGIN
+        IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = $1 AND player_job.job_id = $2) THEN
+            UPDATE player_job SET score = $3 WHERE player_id = $1 AND job_id = $2;
+        ELSE
+            INSERT INTO player_job(player_id, job_id, score) VALUES ($1,$2, $3);
+        END IF;
+    END
+$$
