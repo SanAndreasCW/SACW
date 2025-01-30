@@ -185,9 +185,6 @@ RETURNING *;
 -- name: GetUserJobs :many
 SELECT * FROM player_job WHERE player_id = $1;
 
--- name: InsertUserJobs :one
-INSERT INTO player_job(player_id, job_id, score) VALUES ($1, $2, $3) RETURNING *;
-
 -- name: UpdateUserJobs :exec
 DO
 $$
