@@ -31,7 +31,9 @@ CREATE TABLE IF NOT EXISTS player_job
     id SERIAL PRIMARY KEY,
     player_id INT NOT NULL,
     job_id INT NOT NULL,
-    score INT NOT NULL DEFAULT 0
+    score INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (player_id) REFERENCES player(id),
+    UNIQUE (player_id, job_id)
 );
 CREATE TABLE IF NOT EXISTS skin
 (
