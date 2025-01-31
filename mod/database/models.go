@@ -40,6 +40,12 @@ type CompanyApplication struct {
 	AnsweredAt  sql.NullTime
 }
 
+type CompanyJob struct {
+	ID        int32
+	CompanyID int32
+	JobID     int32
+}
+
 type CompanyMember struct {
 	ID        int32
 	PlayerID  int32
