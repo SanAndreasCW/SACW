@@ -21,6 +21,7 @@ type Job struct {
 	VehicleModels       []omp.VehicleModel
 	CheckpointLocations []*omp.Vector3
 	LookupLocations     []*omp.Vector3
+	Group               enums.JobGroup
 }
 
 type JobCargo struct {

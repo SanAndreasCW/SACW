@@ -43,7 +43,18 @@ type CompanyApplication struct {
 type CompanyJob struct {
 	ID        int32
 	CompanyID int32
-	JobID     int32
+	JobID     int16
+	JobGroup  int16
+}
+
+type CompanyJobCheckpoint struct {
+	ID        int32
+	CompanyID int32
+	JobID     int16
+	Type      int16
+	X         float32
+	Y         float32
+	Z         float32
 }
 
 type CompanyMember struct {

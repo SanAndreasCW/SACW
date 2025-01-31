@@ -250,7 +250,7 @@ func (q *Queries) GetCompanyByTag(ctx context.Context, tag string) (Company, err
 }
 
 const getCompanyJobs = `-- name: GetCompanyJobs :many
-SELECT id, company_id, job_id
+SELECT id, company_id, job_id, job_group
 FROM company_job
 WHERE company_id = $1
 `
@@ -264,7 +264,12 @@ func (q *Queries) GetCompanyJobs(ctx context.Context, companyID int32) ([]Compan
 	var items []CompanyJob
 	for rows.Next() {
 		var i CompanyJob
-		if err := rows.Scan(&i.ID, &i.CompanyID, &i.JobID); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.CompanyID,
+			&i.JobID,
+			&i.JobGroup,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -36,6 +36,7 @@ func OnGameModeInit(_ context.Context, _ omp.Event) error {
 		},
 		CheckpointLocations: deliveryCheckpoints,
 		LookupLocations:     deliveryLookups,
+		Group:               enums.CheckpointVehicle,
 	}
 	logger.Info("Job module initialized.")
 	return nil
