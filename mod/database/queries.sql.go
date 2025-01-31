@@ -562,7 +562,9 @@ func (q *Queries) GetUserCompanyApplicationsHistory(ctx context.Context, arg Get
 }
 
 const getUserJobs = `-- name: GetUserJobs :many
-SELECT id, player_id, job_id, score FROM player_job WHERE player_id = $1
+SELECT id, player_id, job_id, score
+FROM player_job
+WHERE player_id = $1
 `
 
 func (q *Queries) GetUserJobs(ctx context.Context, playerID int32) ([]PlayerJob, error) {
@@ -621,66 +623,6 @@ func (q *Queries) InsertCompanyApplication(ctx context.Context, arg InsertCompan
 		&i.ExpiredAt,
 		&i.Answer,
 		&i.AnsweredAt,
-	)
-	return i, err
-}
-
-const insertCompanyMembers = `-- name: InsertCompanyMembers :one
-WITH member_insert AS (
-    INSERT INTO company_member (player_id, company_id)
-        VALUES ($1, $2)
-        RETURNING id, player_id, company_id, role),
-     info_insert AS (
-         INSERT INTO company_member_info (player_id, company_id)
-             VALUES ($1, $2)
-             RETURNING id, player_id, company_id, hour, minute, score, level)
-SELECT company_member.id, company_member.player_id, company_member.company_id, company_member.role,
-       company_member_info.id, company_member_info.player_id, company_member_info.company_id, company_member_info.hour, company_member_info.minute, company_member_info.score, company_member_info.level
-FROM (SELECT id, player_id, company_id, role
-      FROM member_insert
-      UNION ALL
-      SELECT id, player_id, company_id, role
-      FROM company_member
-      WHERE company_member.player_id = $1
-        AND company_member.company_id = $2) company_member
-         LEFT JOIN
-     (SELECT id, player_id, company_id, hour, minute, score, level
-      FROM info_insert
-      UNION ALL
-      SELECT id, player_id, company_id, hour, minute, score, level
-      FROM company_member_info
-      WHERE company_member_info.player_id = $1
-        AND company_member_info.company_id = $2) company_member_info
-     ON
-         company_member.player_id = company_member_info.player_id AND
-         company_member.company_id = company_member_info.company_id
-`
-
-type InsertCompanyMembersParams struct {
-	PlayerID  int32
-	CompanyID int32
-}
-
-type InsertCompanyMembersRow struct {
-	CompanyMember     CompanyMember
-	CompanyMemberInfo CompanyMemberInfo
-}
-
-func (q *Queries) InsertCompanyMembers(ctx context.Context, arg InsertCompanyMembersParams) (InsertCompanyMembersRow, error) {
-	row := q.db.QueryRowContext(ctx, insertCompanyMembers, arg.PlayerID, arg.CompanyID)
-	var i InsertCompanyMembersRow
-	err := row.Scan(
-		&i.CompanyMember.ID,
-		&i.CompanyMember.PlayerID,
-		&i.CompanyMember.CompanyID,
-		&i.CompanyMember.Role,
-		&i.CompanyMemberInfo.ID,
-		&i.CompanyMemberInfo.PlayerID,
-		&i.CompanyMemberInfo.CompanyID,
-		&i.CompanyMemberInfo.Hour,
-		&i.CompanyMemberInfo.Minute,
-		&i.CompanyMemberInfo.Score,
-		&i.CompanyMemberInfo.Level,
 	)
 	return i, err
 }
@@ -748,8 +690,12 @@ func (q *Queries) UpdateCompany(ctx context.Context, arg UpdateCompanyParams) er
 
 const updateCompanyMemberInfo = `-- name: UpdateCompanyMemberInfo :exec
 UPDATE company_member_info
-SET  level = $3, hour = $4, minute = $5, score = $6
-WHERE company_id = $1 AND player_id = $2
+SET level  = $3,
+    hour   = $4,
+    minute = $5,
+    score  = $6
+WHERE company_id = $1
+  AND player_id = $2
 `
 
 type UpdateCompanyMemberInfoParams struct {
@@ -898,15 +844,22 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Pla
 }
 
 const updateUserJobs = `-- name: UpdateUserJobs :one
-SELECT player_job.id, player_job.player_id, player_job.job_id, player_job.score FROM update_or_create_player_job(1, 1, 0) as player_job
+SELECT player_job.id, player_job.player_id, player_job.job_id, player_job.score
+FROM update_or_create_player_job($1, $2, $3) as player_job
 `
+
+type UpdateUserJobsParams struct {
+	Pid int32
+	Jid int32
+	Sc  int32
+}
 
 type UpdateUserJobsRow struct {
 	PlayerJob PlayerJob
 }
 
-func (q *Queries) UpdateUserJobs(ctx context.Context) (UpdateUserJobsRow, error) {
-	row := q.db.QueryRowContext(ctx, updateUserJobs)
+func (q *Queries) UpdateUserJobs(ctx context.Context, arg UpdateUserJobsParams) (UpdateUserJobsRow, error) {
+	row := q.db.QueryRowContext(ctx, updateUserJobs, arg.Pid, arg.Jid, arg.Sc)
 	var i UpdateUserJobsRow
 	err := row.Scan(
 		&i.PlayerJob.ID,

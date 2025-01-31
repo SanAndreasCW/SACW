@@ -19,6 +19,57 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_or_create_player_membership(pid INT, cid INT)
+    RETURNS TABLE
+            (
+                company_member      company_member,
+                company_member_info company_member_info
+            )
+AS
+$$
+DECLARE
+    company_member_return      company_member%ROWTYPE;
+    company_member_info_return company_member_info%ROWTYPE;
+    company_member_exists      bool;
+    company_member_info_exists bool;
+BEGIN
+    SELECT TRUE
+    INTO company_member_exists
+    FROM company_member
+    WHERE player_id = pid
+      AND company_id = cid;
+    SELECT TRUE
+    INTO company_member_info_exists
+    FROM company_member_info
+    WHERE player_id = pid
+      AND company_id = cid;
+    IF company_member_exists THEN
+        SELECT *
+        INTO company_member_return
+        FROM company_member
+        WHERE player_id = pid
+          AND company_id = cid;
+    ELSE
+        INSERT INTO company_member (player_id, company_id)
+        VALUES (pid, cid)
+        RETURNING * INTO company_member_return;
+    END IF;
+    IF company_member_info_exists THEN
+        SELECT *
+        INTO company_member_info_return
+        FROM company_member_info
+        WHERE player_id = pid
+          AND company_id = cid;
+    ELSE
+        INSERT INTO company_member_info (player_id, company_id)
+        VALUES (pid, cid)
+        RETURNING * INTO company_member_info_return;
+    END IF;
+
+    RETURN QUERY SELECT company_member_return, company_member_info_return;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE IF NOT EXISTS player
 (
     id          SERIAL PRIMARY KEY,

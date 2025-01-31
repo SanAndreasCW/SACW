@@ -57,8 +57,12 @@ WHERE id = $1;
 
 -- name: UpdateCompanyMemberInfo :exec
 UPDATE company_member_info
-SET  level = $3, hour = $4, minute = $5, score = $6
-WHERE company_id = $1 AND player_id = $2;
+SET level  = $3,
+    hour   = $4,
+    minute = $5,
+    score  = $6
+WHERE company_id = $1
+  AND player_id = $2;
 
 -- name: GetUserActiveCompany :one
 SELECT sqlc.embed(company), sqlc.embed(company_member), sqlc.embed(company_member_info)
@@ -101,37 +105,6 @@ LIMIT 1;
 SELECT *
 FROM company_member
 WHERE company_id = $1;
-
--- name: InsertCompanyMembers :one
-WITH member_insert AS (
-    INSERT INTO company_member (player_id, company_id)
-        VALUES ($1, $2)
-        RETURNING *),
-     info_insert AS (
-         INSERT INTO company_member_info (player_id, company_id)
-             VALUES ($1, $2)
-             RETURNING *)
-SELECT sqlc.embed(company_member),
-       sqlc.embed(company_member_info)
-FROM (SELECT *
-      FROM member_insert
-      UNION ALL
-      SELECT *
-      FROM company_member
-      WHERE company_member.player_id = $1
-        AND company_member.company_id = $2) company_member
-         LEFT JOIN
-     (SELECT *
-      FROM info_insert
-      UNION ALL
-      SELECT *
-      FROM company_member_info
-      WHERE company_member_info.player_id = $1
-        AND company_member_info.company_id = $2) company_member_info
-     ON
-         company_member.player_id = company_member_info.player_id AND
-         company_member.company_id = company_member_info.company_id;
-
 
 -- name: GetCompanyMembersInfo :many
 SELECT *
@@ -183,7 +156,10 @@ RETURNING *;
 
 
 -- name: GetUserJobs :many
-SELECT * FROM player_job WHERE player_id = $1;
+SELECT *
+FROM player_job
+WHERE player_id = $1;
 
 -- name: UpdateUserJobs :one
-SELECT sqlc.embed(player_job) FROM update_or_create_player_job(1, 1, 0) as player_job;
+SELECT sqlc.embed(player_job)
+FROM update_or_create_player_job($1, $2, $3) as player_job;
