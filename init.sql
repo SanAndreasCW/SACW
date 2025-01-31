@@ -17,6 +17,7 @@ VALUES (DEFAULT,
 INSERT INTO company_job
 VALUES (DEFAULT,
         1,
+        1,
         1);
 
 -- Snapp
@@ -38,4 +39,5 @@ VALUES (DEFAULT,
 INSERT INTO company_job
 VALUES (DEFAULT,
         2,
+        1,
         1);
