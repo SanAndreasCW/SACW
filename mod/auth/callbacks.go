@@ -93,6 +93,7 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 				Success: true,
 			})
 			_ = omp.EventListener().HandleEvent(ctx, onAuthEvent)
+			playerI.SetMoney(playerI.StoreModel.Money)
 			playerI.SendClientMessage("Registration successful. Welcome to the server!", colors.SuccessColor.Hex)
 			playerI.Spawn()
 			return nil
@@ -128,6 +129,7 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 				Success: true,
 			})
 			_ = omp.EventListener().HandleEvent(ctx, onAuthEvent)
+			playerI.SetMoney(playerI.StoreModel.Money)
 			playerI.SendClientMessage("Login successful. Welcome back!", colors.SuccessColor.Hex)
 			playerI.Spawn()
 			return nil
