@@ -187,3 +187,11 @@ CREATE TABLE IF NOT EXISTS company_application
     FOREIGN KEY (player_id) REFERENCES player (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE IF NOT EXISTS company_job
+(
+    id SERIAL PRIMARY KEY,
+    company_id INT NOT NULL,
+    job_id INT NOT NULL,
+    FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE (company_id, job_id)
+);
