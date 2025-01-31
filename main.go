@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	_ "github.com/SanAndreasCW/SACW/mod/cmd"
 	_ "github.com/SanAndreasCW/SACW/mod/dev"
 
@@ -46,10 +45,6 @@ func init() {
 			}
 		}(database.DB)
 		return err
-	})
-	omp.ListenFunc(omp.EventTypePlayerCommandText, func(ctx context.Context, event omp.Event) error {
-		fmt.Println(event)
-		return nil
 	})
 }
 
