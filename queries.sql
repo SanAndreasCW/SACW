@@ -88,6 +88,11 @@ SELECT *
 FROM company_job
 WHERE company_id = $1;
 
+-- name: GetCompanyJobsCheckpoint :many
+SELECT *
+FROM company_job_checkpoint
+WHERE company_id = $1;
+
 -- name: UpdateCompany :exec
 UPDATE company
 SET balance    = $1,

@@ -16,15 +16,16 @@ type CompanyApplicationI struct {
 }
 
 type CompanyI struct {
-	StoreModel       *database.Company
-	CompanyOffice    *database.CompanyOffice
-	CompanyJobs      []database.CompanyJob
-	BalanceLock      sync.Mutex
-	Applications     []*CompanyApplicationI
-	ApplicationsLock sync.RWMutex
-	Members          []*PlayerI
-	MembersLock      sync.RWMutex
-	CompanyPickup    *omp.Pickup
+	StoreModel             *database.Company
+	CompanyOffice          *database.CompanyOffice
+	CompanyJobs            []database.CompanyJob
+	CompanyJobsCheckpoints map[enums.JobType][]database.CompanyJobCheckpoint
+	BalanceLock            sync.Mutex
+	Applications           []*CompanyApplicationI
+	ApplicationsLock       sync.RWMutex
+	Members                []*PlayerI
+	MembersLock            sync.RWMutex
+	CompanyPickup          *omp.Pickup
 }
 
 type CompanyMemberInfoI struct {

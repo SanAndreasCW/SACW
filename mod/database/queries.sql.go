@@ -283,6 +283,43 @@ func (q *Queries) GetCompanyJobs(ctx context.Context, companyID int32) ([]Compan
 	return items, nil
 }
 
+const getCompanyJobsCheckpoint = `-- name: GetCompanyJobsCheckpoint :many
+SELECT id, company_id, job_id, type, x, y, z
+FROM company_job_checkpoint
+WHERE company_id = $1
+`
+
+func (q *Queries) GetCompanyJobsCheckpoint(ctx context.Context, companyID int32) ([]CompanyJobCheckpoint, error) {
+	rows, err := q.db.QueryContext(ctx, getCompanyJobsCheckpoint, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompanyJobCheckpoint
+	for rows.Next() {
+		var i CompanyJobCheckpoint
+		if err := rows.Scan(
+			&i.ID,
+			&i.CompanyID,
+			&i.JobID,
+			&i.Type,
+			&i.X,
+			&i.Y,
+			&i.Z,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCompanyMembers = `-- name: GetCompanyMembers :many
 SELECT id, player_id, company_id, role
 FROM company_member
