@@ -249,6 +249,35 @@ func (q *Queries) GetCompanyByTag(ctx context.Context, tag string) (Company, err
 	return i, err
 }
 
+const getCompanyJobs = `-- name: GetCompanyJobs :many
+SELECT id, company_id, job_id
+FROM company_job
+WHERE company_id = $1
+`
+
+func (q *Queries) GetCompanyJobs(ctx context.Context, companyID int32) ([]CompanyJob, error) {
+	rows, err := q.db.QueryContext(ctx, getCompanyJobs, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CompanyJob
+	for rows.Next() {
+		var i CompanyJob
+		if err := rows.Scan(&i.ID, &i.CompanyID, &i.JobID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCompanyMembers = `-- name: GetCompanyMembers :many
 SELECT id, player_id, company_id, role
 FROM company_member

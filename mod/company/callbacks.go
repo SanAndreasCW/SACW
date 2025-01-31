@@ -48,10 +48,12 @@ func OnGameModeInit(ctx context.Context, _ omp.Event) error {
 			Y: company.CompanyOffice.PickupY,
 			Z: company.CompanyOffice.PickupZ,
 		})
+		companyJobs, _ := q.GetCompanyJobs(ctx, company.Company.ID)
 		companyI := &commons.CompanyI{
 			StoreModel:    &company.Company,
 			CompanyOffice: &company.CompanyOffice,
 			CompanyPickup: pickup,
+			CompanyJobs:   companyJobs,
 		}
 		commons.Companies[company.Company.ID] = companyI
 	}

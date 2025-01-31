@@ -83,6 +83,11 @@ SELECT sqlc.embed(company), sqlc.embed(company_office)
 FROM company
          JOIN company_office ON (company.id = company_office.company_id);
 
+-- name: GetCompanyJobs :many
+SELECT *
+FROM company_job
+WHERE company_id = $1;
+
 -- name: UpdateCompany :exec
 UPDATE company
 SET balance    = $1,
