@@ -14,6 +14,10 @@ VALUES (DEFAULT,
         2183.459717,
         -2254.026855,
         14.771435);
+INSERT INTO company_job
+VALUES (DEFAULT,
+        1,
+        1);
 
 -- Snapp
 INSERT INTO company
@@ -31,3 +35,7 @@ VALUES (DEFAULT,
         1500.237793,
         -1053.283936,
         25.062500);
+INSERT INTO company_job
+VALUES (DEFAULT,
+        2,
+        1);
