@@ -69,7 +69,18 @@ func (p *PlayerI) SetJobCheckpoint() {
 	pos := p.Position()
 	cp := p.DefaultCheckpoint()
 	if !p.Job.Cargo.Loaded {
-		cp.SetPosition(*FindNearestToPoints(&pos, p.Job.Job.LookupLocations))
+		point := If(
+			p.Job.Company == nil,
+			*FindNearestToPoints(&pos, p.Job.Job.LookupLocations),
+			*FindNearestToPoints(&pos, func() []*omp.Vector3 {
+				var checkpoints []*omp.Vector3
+				for _, checkpoint := range p.Job.Company.CompanyJobsCheckpoints[p.Job.Job.ID] {
+					checkpoints = append(checkpoints, &checkpoint.CheckpointVector)
+				}
+				return checkpoints
+			}()),
+		)
+		cp.SetPosition(point)
 		cp.SetRadius(5.0)
 		cp.Enable()
 		return

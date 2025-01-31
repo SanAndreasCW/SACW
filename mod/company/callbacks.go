@@ -50,11 +50,14 @@ func OnGameModeInit(ctx context.Context, _ omp.Event) error {
 		})
 		companyJobs, _ := q.GetCompanyJobs(ctx, company.Company.ID)
 		companyJobsCheckpoints, _ := q.GetCompanyJobsCheckpoint(ctx, company.Company.ID)
-		tempJobsCheckpoint := make(map[enums.JobType][]database.CompanyJobCheckpoint)
+		tempJobsCheckpoint := make(map[enums.JobType][]commons.CompanyJobCheckpointI)
 		for _, jobCheckpoint := range companyJobsCheckpoints {
 			tempJobsCheckpoint[enums.JobType(jobCheckpoint.JobID)] = append(
 				tempJobsCheckpoint[enums.JobType(jobCheckpoint.JobID)],
-				jobCheckpoint,
+				commons.CompanyJobCheckpointI{
+					StoreModel:       &jobCheckpoint,
+					CheckpointVector: omp.Vector3{X: jobCheckpoint.X, Y: jobCheckpoint.Y, Z: jobCheckpoint.Z},
+				},
 			)
 		}
 		companyI := &commons.CompanyI{

@@ -15,11 +15,16 @@ type CompanyApplicationI struct {
 	PlayerModel *database.Player
 }
 
+type CompanyJobCheckpointI struct {
+	StoreModel       *database.CompanyJobCheckpoint
+	CheckpointVector omp.Vector3
+}
+
 type CompanyI struct {
 	StoreModel             *database.Company
 	CompanyOffice          *database.CompanyOffice
 	CompanyJobs            []database.CompanyJob
-	CompanyJobsCheckpoints map[enums.JobType][]database.CompanyJobCheckpoint
+	CompanyJobsCheckpoints map[enums.JobType][]CompanyJobCheckpointI
 	BalanceLock            sync.Mutex
 	Applications           []*CompanyApplicationI
 	ApplicationsLock       sync.RWMutex
