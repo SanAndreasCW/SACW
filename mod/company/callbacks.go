@@ -147,7 +147,7 @@ func onPlayerKeyStateChange(_ context.Context, e omp.Event) error {
 						statsDialog.ShowFor(playerI.Player)
 						return nil
 					case "Send Application":
-						companiesApplicationAction(playerI, &company.StoreModel.Tag)
+						companiesApplicationAction(playerI, company.StoreModel.Tag)
 						return nil
 					case "Jobs":
 						companiesJobsAction(playerI, company)

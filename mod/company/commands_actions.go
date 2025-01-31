@@ -12,9 +12,9 @@ import (
 	"github.com/kodeyeen/omp"
 )
 
-func companiesApplicationAction(playerI *commons.PlayerI, tag *string) {
+func companiesApplicationAction(playerI *commons.PlayerI, tag string) {
 	for _, company := range commons.Companies {
-		if company.StoreModel.Tag == *tag {
+		if company.StoreModel.Tag == tag {
 			if playerI.Membership != nil {
 				companyStatsDialog(company).ShowFor(playerI.Player)
 				return

@@ -17,7 +17,7 @@ func companiesCommand(cmd *cmd.Command) {
 		case "application":
 			if paramsLength >= 1 {
 				tag := parameters[0]
-				companiesApplicationAction(playerI, &tag)
+				companiesApplicationAction(playerI, tag)
 				return
 			}
 		case "history":
@@ -49,7 +49,7 @@ func companiesCommand(cmd *cmd.Command) {
 		if ep.Response == omp.DialogResponseRight {
 			return nil
 		}
-		companiesApplicationAction(playerI, &ep.Item[1])
+		companiesApplicationAction(playerI, ep.Item[1])
 		return nil
 	})
 	companiesDialog.ShowFor(playerI.Player)
