@@ -29,14 +29,6 @@ VALUES (DEFAULT,
         2181.576660,
         -2302.060547,
         13.546875);
-INSERT INTO company_job_checkpoint
-VALUES (DEFAULT,
-        1,
-        1,
-        0,
-        2233.792236,
-        -2216.103516,
-        13.546875);
 
 -- Snapp
 INSERT INTO company
