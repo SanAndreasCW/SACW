@@ -192,6 +192,18 @@ CREATE TABLE IF NOT EXISTS company_job
     id SERIAL PRIMARY KEY,
     company_id INT NOT NULL,
     job_id INT NOT NULL,
+    job_group int2 NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE (company_id, job_id)
+);
+CREATE TABLE IF NOT EXISTS company_job_checkpoint
+(
+    id SERIAL PRIMARY KEY,
+    company_id INT NOT NULL,
+    job_id INT NOT NULL,
+    type INT NOT NULL,
+    x float4 NOT NULL,
+    y float4 NOT NULL,
+    z float4 NOT NULL,
+    FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE,
 );

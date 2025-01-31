@@ -2,7 +2,20 @@ package enums
 
 import "strings"
 
+type JobGroup int16
+type CheckpointType int16
 type JobType int32
+
+const (
+	CheckpointFoot JobGroup = iota
+	CheckpointVehicle
+	Free
+)
+
+const (
+	Target CheckpointType = iota
+	Lookup
+)
 
 const (
 	Unknown JobType = iota
