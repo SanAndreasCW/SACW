@@ -1,15 +1,28 @@
 package enums
 
-type JobType uint32
+import "strings"
+
+type JobType int32
 
 const (
-	Delivery JobType = 0
+	Unknown JobType = iota
+	Delivery
 )
+
+func GetJobType(s string) JobType {
+	s = strings.ToLower(strings.TrimSpace(s))
+	switch s {
+	case "delivery":
+		return Delivery
+	}
+	return Unknown
+}
 
 func (t JobType) String() string {
 	switch t {
 	case Delivery:
 		return "Delivery"
+	default:
+		return "Unknown"
 	}
-	return "unknown"
 }

@@ -320,18 +320,22 @@ func companiesJobsAction(playerI *commons.PlayerI, company *commons.CompanyI) {
 		return
 	}
 	companyJobsDialog := omp.NewListDialog("Company Jobs", "Select", "Close")
-	companyJobsDialog.Add("Delivery")
+	for _, job := range company.CompanyJobs {
+		jobID := enums.JobType(job.JobID)
+		companyJobsDialog.Add(jobID.String())
+	}
 	companyJobsDialog.Events.ListenFunc(omp.EventTypeDialogResponse, func(ctx context.Context, e omp.Event) error {
 		ep := e.Payload().(*omp.ListDialogResponseEvent)
 		if ep.Response == omp.DialogResponseRight {
 			return nil
 		}
-		switch ep.Item {
-		case enums.Delivery.String():
-			playerI.JoinJob(enums.Delivery, company)
-			playerI.SendClientMessage(fmt.Sprintf("[Company Job]: You've hired into %s job successfully.", enums.Delivery.String()), colors.SuccessColor.Hex)
+		job := enums.GetJobType(ep.Item)
+		if job == enums.Unknown {
+			playerI.SendClientMessage("[Company Jobs]: Invalid job type.", colors.ErrorColor.Hex)
 			return nil
 		}
+		playerI.JoinJob(job, company)
+		playerI.SendClientMessage(fmt.Sprintf("[Company Job]: You've hired into %s job successfully.", job.String()), colors.SuccessColor.Hex)
 		return nil
 	})
 	companyJobsDialog.ShowFor(playerI.Player)
