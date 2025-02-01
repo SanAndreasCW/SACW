@@ -3,6 +3,7 @@ package commons
 import (
 	"github.com/SanAndreasCW/SACW/mod/enums"
 	"github.com/kodeyeen/omp"
+	"sync"
 )
 
 type Score int32
@@ -32,10 +33,12 @@ type JobCargo struct {
 }
 
 type PlayerJob struct {
-	Job     *Job
-	Company *CompanyI
-	Cargo   *JobCargo
-	Vehicle *omp.Vehicle
-	OnDuty  bool
-	Idle    bool
+	Job       *Job
+	Company   *CompanyI
+	Cargo     *JobCargo
+	Vehicle   *omp.Vehicle
+	OnDuty    bool
+	Idle      bool
+	Score     Score
+	ScoreLock sync.RWMutex
 }
