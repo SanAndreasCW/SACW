@@ -105,8 +105,7 @@ func (p *PlayerI) NextCounter() int32 {
 	return c
 }
 
-func (p *PlayerI) GetCurrentCompanyMembership() *PlayerMembership {
-	ctx := context.Background()
+func (p *PlayerI) GetCurrentCompanyMembership(ctx context.Context) *PlayerMembership {
 	q := database.New(database.DB)
 	if p.Membership == nil {
 		c, err := q.GetUserActiveCompany(ctx, p.StoreModel.ID)
@@ -130,8 +129,7 @@ func (p *PlayerI) HasCompanyPermission(permissions *[]int16, role int16) bool {
 	return If(slices.Contains(*permissions, role), true, false)
 }
 
-func (p *PlayerI) GetPlayerCompanies() []*CompanyI {
-	ctx := context.Background()
+func (p *PlayerI) GetPlayerCompanies(ctx context.Context) []*CompanyI {
 	q := database.New(database.DB)
 	companiesInfo, err := q.GetUserCompaniesInfo(ctx, p.StoreModel.ID)
 	if err != nil {
@@ -160,8 +158,7 @@ func (p *PlayerI) SetMoney(money int32) {
 	p.MoneyLock.Unlock()
 }
 
-func (p *PlayerI) SyncPlayer() {
-	ctx := context.Background()
+func (p *PlayerI) SyncPlayer(ctx context.Context) {
 	playerPosition := p.Position()
 	p.StoreModel.PosX = playerPosition.X
 	p.StoreModel.PosY = playerPosition.Y
@@ -194,8 +191,7 @@ func (p *PlayerI) SyncPlayer() {
 	}
 }
 
-func (p *PlayerI) SyncCompanyMemberInfo() {
-	ctx := context.Background()
+func (p *PlayerI) SyncCompanyMemberInfo(ctx context.Context) {
 	q := database.New(database.DB)
 	if p.Membership != nil {
 		err := q.UpdateCompanyMemberInfo(ctx, database.UpdateCompanyMemberInfoParams{

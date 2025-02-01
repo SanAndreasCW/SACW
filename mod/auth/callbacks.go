@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func OnGameModeInit(_ context.Context, _ omp.Event) error {
+func OnGameModeInit(ctx context.Context, _ omp.Event) error {
 	_, _ = omp.NewClass(255, 12, omp.Vector3{X: 0.0, Y: 0.0, Z: 0.0}, 0.0, 0, 0, 0, 0, 0, 0)
 	timer.SetTimer(&timer.Timer{
 		Duration: time.Minute * 1,
@@ -28,7 +28,7 @@ func OnGameModeInit(_ context.Context, _ omp.Event) error {
 					playerI.StoreModel.Minute = 0
 				}
 
-				if companyMembership := playerI.GetCurrentCompanyMembership(); companyMembership != nil {
+				if companyMembership := playerI.GetCurrentCompanyMembership(ctx); companyMembership != nil {
 					companyMembership.CompanyMemberInfo.Minute += 1
 
 					if companyMembership.CompanyMemberInfo.Minute >= 60 {
@@ -138,14 +138,14 @@ func onPlayerConnect(ctx context.Context, e omp.Event) error {
 	return nil
 }
 
-func onPlayerDisconnect(_ context.Context, e omp.Event) error {
+func onPlayerDisconnect(ctx context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerDisconnectEvent)
 	playerI := commons.PlayersI[ep.Player.ID()]
 	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
 		return nil
 	}
-	playerI.SyncPlayer()
-	playerI.SyncCompanyMemberInfo()
+	playerI.SyncPlayer(ctx)
+	playerI.SyncCompanyMemberInfo(ctx)
 	delete(commons.PlayersI, ep.Player.ID())
 	return nil
 }

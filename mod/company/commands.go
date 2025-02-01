@@ -9,6 +9,7 @@ import (
 )
 
 func companiesCommand(cmd *cmd.Command) {
+	ctx := context.Background()
 	playerI := commons.PlayersI[cmd.Sender.ID()]
 	if argsCount := len(cmd.Args); argsCount > 0 {
 		action, parameters := cmd.Args[0], cmd.Args[1:]
@@ -25,7 +26,7 @@ func companiesCommand(cmd *cmd.Command) {
 			return
 
 		case "applications":
-			companyApplicationsActions(playerI)
+			companyApplicationsActions(ctx, playerI)
 			return
 		}
 		playerI.SendClientMessage("[Command Guide]: /companies :optional[actions] :optional[data...]", colors.InfoColor.Hex)
@@ -56,15 +57,16 @@ func companiesCommand(cmd *cmd.Command) {
 }
 
 func companyCommand(cmd *cmd.Command) {
+	ctx := context.Background()
 	playerI := commons.PlayersI[cmd.Sender.ID()]
 	if argsCount := len(cmd.Args); argsCount > 0 {
 		action, _ := cmd.Args[0], cmd.Args[1:]
 		switch action {
 		case "applications":
-			companyApplicationsActions(playerI)
+			companyApplicationsActions(ctx, playerI)
 			return
 		case "stats":
-			playerCompanyStats(playerI)
+			playerCompanyStats(ctx, playerI)
 			return
 		}
 	}

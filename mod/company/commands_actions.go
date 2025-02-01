@@ -91,8 +91,8 @@ func companiesHistoryAction(playerI *commons.PlayerI) {
 	companyHistory.ShowFor(playerI.Player)
 }
 
-func companyApplicationsActions(playerI *commons.PlayerI) {
-	companyMembership := playerI.GetCurrentCompanyMembership()
+func companyApplicationsActions(ctx context.Context, playerI *commons.PlayerI) {
+	companyMembership := playerI.GetCurrentCompanyMembership(ctx)
 	if !playerI.IsInCompany() {
 		playerI.SendClientMessage(
 			"[Company Applications]: You are not in a company to check incoming company applications.",
@@ -278,8 +278,8 @@ func companyApplicationsActions(playerI *commons.PlayerI) {
 	companyApplicationsDialog.ShowFor(playerI.Player)
 }
 
-func playerCompanyStats(playerI *commons.PlayerI) {
-	companyMembership := playerI.GetCurrentCompanyMembership()
+func playerCompanyStats(ctx context.Context, playerI *commons.PlayerI) {
+	companyMembership := playerI.GetCurrentCompanyMembership(ctx)
 	if companyMembership == nil {
 		playerI.SendClientMessage(
 			"[Company Applications]: You are not in a company to check incoming company applications.",

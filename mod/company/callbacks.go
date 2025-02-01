@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func onAuthSuccess(_ context.Context, e omp.Event) error {
+func onAuthSuccess(ctx context.Context, e omp.Event) error {
 	ep := e.Payload().(*auth.OnAuthSuccessEvent)
 	if !ep.Success {
 		return nil
@@ -28,7 +28,7 @@ func onAuthSuccess(_ context.Context, e omp.Event) error {
 			})
 		}
 	}()
-	companyMembership := ep.PlayerI.GetCurrentCompanyMembership()
+	companyMembership := ep.PlayerI.GetCurrentCompanyMembership(ctx)
 	if companyMembership != nil {
 		companyMembership.Company.ReloadApplications()
 	}
@@ -140,7 +140,7 @@ func onPlayerKeyStateChange(_ context.Context, e omp.Event) error {
 					}
 					switch ep.Item {
 					case "Applications":
-						companyApplicationsActions(playerI)
+						companyApplicationsActions(ctx, playerI)
 						return nil
 					case "Stats":
 						statsDialog := companyStatsDialog(company)
