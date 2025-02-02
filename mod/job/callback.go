@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"github.com/SanAndreasCW/SACW/mod/auth"
 	"github.com/SanAndreasCW/SACW/mod/colors"
 	"github.com/SanAndreasCW/SACW/mod/commons"
 	"github.com/SanAndreasCW/SACW/mod/enums"
@@ -95,5 +96,12 @@ func onPlayerEnterCheckpoint(_ context.Context, e omp.Event) error {
 		playerI.SendClientMessage("You've to deliver cargo to the targeted location.", colors.NoteColor.Hex)
 	}
 	playerI.SetJobCheckpoint()
+	return nil
+}
+
+func onAuthSuccess(ctx context.Context, e omp.Event) error {
+	ep := e.Payload().(*auth.OnAuthSuccessEvent)
+	playerI := commons.PlayersI[ep.PlayerI.ID()]
+	playerI.LoadJobsInfo(ctx)
 	return nil
 }

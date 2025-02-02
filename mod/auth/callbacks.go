@@ -144,6 +144,8 @@ func onPlayerDisconnect(ctx context.Context, e omp.Event) error {
 	if playerI == nil || playerI.Cache == nil || !playerI.Cache.IsLoggedIn {
 		return nil
 	}
+	playerI.SyncJobInfo(ctx)
+	playerI.LeaveJob()
 	playerI.SyncPlayer(ctx)
 	playerI.SyncCompanyMemberInfo(ctx)
 	delete(commons.PlayersI, ep.Player.ID())

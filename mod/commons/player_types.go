@@ -28,7 +28,7 @@ type PlayerI struct {
 	IconCounter      int32
 	Cache            *PlayerCache
 	Job              *PlayerJob
-	JobsStats        *[]database.PlayerJob
+	JobsStats        *map[enums.JobType]*database.PlayerJob
 }
 
 type PlayerCache struct {
@@ -48,13 +48,26 @@ func (p *PlayerI) GiveJobScore(score Score) {
 	p.Job.Score += score
 }
 
+func (p *PlayerI) LoadJobsInfo(ctx context.Context) {
+	q := database.New(database.DB)
+	jobs, err := q.GetUserJobs(ctx, p.StoreModel.ID)
+	if err != nil {
+		logger.Fatal("[Player:%s] load jobs info error: %s", p.StoreModel.ID, err)
+	}
+	for _, job := range jobs {
+		jobState := *p.JobsStats
+		jobState[enums.JobType(job.JobID)] = &job
+	}
+}
+
 func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
+	var jobHistory *database.PlayerJob
 	currentJob := Jobs[job]
-	jobIndex := slices.IndexFunc(*p.JobsStats, func(e database.PlayerJob) bool {
-		return enums.JobType(e.JobID) == currentJob.ID
-	})
-	js := *p.JobsStats
-	jobHistory := js[jobIndex]
+	if p.JobsStats == nil {
+		js := *p.JobsStats
+		jobHistory = js[job]
+	}
+
 	p.Job = &PlayerJob{
 		Job:     currentJob,
 		Company: company,
@@ -66,17 +79,34 @@ func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
 			Loaded: false,
 			Value:  1,
 		},
-		Score: Score(If(jobIndex == -1, 0, jobHistory.Score)),
+		Score: Score(If(jobHistory == nil, 0, jobHistory.Score)),
 	}
 	cp := p.DefaultCheckpoint()
 	cp.SetPosition(*currentJob.CheckpointLocations[rand.Intn(len(currentJob.CheckpointLocations))])
 	cp.SetRadius(5.0)
 }
 
-func (p *PlayerI) LeaveJob() Job {
+func (p *PlayerI) LeaveJob() *Job {
 	job := p.Job
+	if p.Job == nil {
+		return nil
+	}
+	js := *p.JobsStats
+	jobHistory, ok := js[job.Job.ID]
+	if ok {
+		job.ScoreLock.Lock()
+		jobHistory.Score = int32(job.Score)
+		job.ScoreLock.Unlock()
+	} else {
+		jobHistory = &database.PlayerJob{
+			PlayerID: p.StoreModel.ID,
+			JobID:    int32(job.Job.ID),
+			Score:    int32(job.Score),
+		}
+	}
+	go p.SyncJobInfo(context.Background())
 	p.Job = nil
-	return *job.Job
+	return job.Job
 }
 
 func (p *PlayerI) SetJobCheckpoint() {
