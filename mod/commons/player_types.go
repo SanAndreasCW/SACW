@@ -54,8 +54,11 @@ func (p *PlayerI) LoadJobsInfo(ctx context.Context) {
 	if err != nil {
 		logger.Fatal("[Player:%s] load jobs info error: %s", p.StoreModel.ID, err)
 	}
+	if p.JobsStats == nil {
+		p.JobsStats = &map[enums.JobType]*database.PlayerJob{}
+	}
+	jobState := *p.JobsStats
 	for _, job := range jobs {
-		jobState := *p.JobsStats
 		jobState[enums.JobType(job.JobID)] = &job
 	}
 }
@@ -63,7 +66,7 @@ func (p *PlayerI) LoadJobsInfo(ctx context.Context) {
 func (p *PlayerI) JoinJob(job enums.JobType, company *CompanyI) {
 	var jobHistory *database.PlayerJob
 	currentJob := Jobs[job]
-	if p.JobsStats == nil {
+	if p.JobsStats != nil {
 		js := *p.JobsStats
 		jobHistory = js[job]
 	}
@@ -91,20 +94,21 @@ func (p *PlayerI) LeaveJob() *Job {
 	if p.Job == nil {
 		return nil
 	}
-	js := *p.JobsStats
-	jobHistory, ok := js[job.Job.ID]
-	if ok {
-		job.ScoreLock.Lock()
-		jobHistory.Score = int32(job.Score)
-		job.ScoreLock.Unlock()
-	} else {
-		jobHistory = &database.PlayerJob{
-			PlayerID: p.StoreModel.ID,
-			JobID:    int32(job.Job.ID),
-			Score:    int32(job.Score),
+	if p.JobsStats != nil {
+		js := *p.JobsStats
+		jobHistory, ok := js[job.Job.ID]
+		if ok {
+			job.ScoreLock.Lock()
+			jobHistory.Score = int32(job.Score)
+			job.ScoreLock.Unlock()
+		} else {
+			jobHistory = &database.PlayerJob{
+				PlayerID: p.StoreModel.ID,
+				JobID:    int32(job.Job.ID),
+				Score:    int32(job.Score),
+			}
 		}
 	}
-	go p.SyncJobInfo(context.Background())
 	p.Job = nil
 	return job.Job
 }

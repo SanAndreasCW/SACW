@@ -46,6 +46,9 @@ func OnGameModeInit(_ context.Context, _ omp.Event) error {
 func onPlayerStateChange(_ context.Context, e omp.Event) error {
 	ep := e.Payload().(*omp.PlayerStateChangeEvent)
 	playerI := commons.PlayersI[ep.Player.ID()]
+	if playerI == nil {
+		return nil
+	}
 	if playerI.Job == nil {
 		return nil
 	}
@@ -84,6 +87,8 @@ func onPlayerEnterCheckpoint(_ context.Context, e omp.Event) error {
 		playerI.SendClientMessage("You've successfully delivered the cargo.", colors.SuccessColor.Hex)
 		playerI.Job.Cargo.Amount -= 1
 		playerI.GiveMoney(int32(playerI.Job.Cargo.Value * 1000))
+		playerI.GiveJobScore(1)
+		go playerI.SyncJobInfo(context.Background())
 
 		if playerI.Job.Cargo.Amount <= 0 {
 			playerI.Job.Cargo.Loaded = false
