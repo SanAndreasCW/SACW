@@ -1,75 +1,3 @@
-CREATE OR REPLACE FUNCTION update_or_create_player_job(pid INT, jid INT, sc INT)
-    RETURNS player_job AS
-$$
-DECLARE
-    player_job_return player_job%ROWTYPE;
-BEGIN
-    IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = pid AND player_job.job_id = jid) THEN
-        UPDATE player_job
-        SET score = sc
-        WHERE player_job.player_id = pid
-          AND player_job.job_id = jid
-        RETURNING * INTO player_job_return;
-    ELSE
-        INSERT INTO player_job(player_id, job_id, score)
-        VALUES (pid, jid, sc)
-        RETURNING * INTO player_job_return;
-    END IF;
-    return player_job_return;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION update_or_create_player_membership(pid INT, cid INT)
-    RETURNS TABLE
-            (
-                company_member      company_member,
-                company_member_info company_member_info
-            )
-AS
-$$
-DECLARE
-    company_member_return      company_member%ROWTYPE;
-    company_member_info_return company_member_info%ROWTYPE;
-    company_member_exists      bool;
-    company_member_info_exists bool;
-BEGIN
-    SELECT TRUE
-    INTO company_member_exists
-    FROM company_member
-    WHERE player_id = pid
-      AND company_id = cid;
-    SELECT TRUE
-    INTO company_member_info_exists
-    FROM company_member_info
-    WHERE player_id = pid
-      AND company_id = cid;
-    IF company_member_exists THEN
-        SELECT *
-        INTO company_member_return
-        FROM company_member
-        WHERE player_id = pid
-          AND company_id = cid;
-    ELSE
-        INSERT INTO company_member (player_id, company_id)
-        VALUES (pid, cid)
-        RETURNING * INTO company_member_return;
-    END IF;
-    IF company_member_info_exists THEN
-        SELECT *
-        INTO company_member_info_return
-        FROM company_member_info
-        WHERE player_id = pid
-          AND company_id = cid;
-    ELSE
-        INSERT INTO company_member_info (player_id, company_id)
-        VALUES (pid, cid)
-        RETURNING * INTO company_member_info_return;
-    END IF;
-
-    RETURN QUERY SELECT company_member_return, company_member_info_return;
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE TABLE IF NOT EXISTS player
 (
     id          SERIAL PRIMARY KEY,
@@ -189,21 +117,93 @@ CREATE TABLE IF NOT EXISTS company_application
 );
 CREATE TABLE IF NOT EXISTS company_job
 (
-    id SERIAL PRIMARY KEY,
-    company_id INT NOT NULL,
-    job_id int2 NOT NULL,
-    job_group int2 NOT NULL,
+    id         SERIAL PRIMARY KEY,
+    company_id INT  NOT NULL,
+    job_id     int2 NOT NULL,
+    job_group  int2 NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE (company_id, job_id)
 );
 CREATE TABLE IF NOT EXISTS company_job_checkpoint
 (
-    id SERIAL PRIMARY KEY,
-    company_id INT NOT NULL,
-    job_id int2 NOT NULL,
-    type int2 NOT NULL,
-    x float4 NOT NULL,
-    y float4 NOT NULL,
-    z float4 NOT NULL,
+    id         SERIAL PRIMARY KEY,
+    company_id INT    NOT NULL,
+    job_id     int2   NOT NULL,
+    type       int2   NOT NULL,
+    x          float4 NOT NULL,
+    y          float4 NOT NULL,
+    z          float4 NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE OR REPLACE FUNCTION update_or_create_player_job(pid INT, jid INT, sc INT)
+    RETURNS player_job AS
+$$
+DECLARE
+    player_job_return player_job%ROWTYPE;
+BEGIN
+    IF EXISTS (SELECT FROM player_job WHERE player_job.player_id = pid AND player_job.job_id = jid) THEN
+        UPDATE player_job
+        SET score = sc
+        WHERE player_job.player_id = pid
+          AND player_job.job_id = jid
+        RETURNING * INTO player_job_return;
+    ELSE
+        INSERT INTO player_job(player_id, job_id, score)
+        VALUES (pid, jid, sc)
+        RETURNING * INTO player_job_return;
+    END IF;
+    return player_job_return;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_or_create_player_membership(pid INT, cid INT)
+    RETURNS TABLE
+            (
+                company_member      company_member,
+                company_member_info company_member_info
+            )
+AS
+$$
+DECLARE
+    company_member_return      company_member%ROWTYPE;
+    company_member_info_return company_member_info%ROWTYPE;
+    company_member_exists      bool;
+    company_member_info_exists bool;
+BEGIN
+    SELECT TRUE
+    INTO company_member_exists
+    FROM company_member
+    WHERE player_id = pid
+      AND company_id = cid;
+    SELECT TRUE
+    INTO company_member_info_exists
+    FROM company_member_info
+    WHERE player_id = pid
+      AND company_id = cid;
+    IF company_member_exists THEN
+        SELECT *
+        INTO company_member_return
+        FROM company_member
+        WHERE player_id = pid
+          AND company_id = cid;
+    ELSE
+        INSERT INTO company_member (player_id, company_id)
+        VALUES (pid, cid)
+        RETURNING * INTO company_member_return;
+    END IF;
+    IF company_member_info_exists THEN
+        SELECT *
+        INTO company_member_info_return
+        FROM company_member_info
+        WHERE player_id = pid
+          AND company_id = cid;
+    ELSE
+        INSERT INTO company_member_info (player_id, company_id)
+        VALUES (pid, cid)
+        RETURNING * INTO company_member_info_return;
+    END IF;
+
+    RETURN QUERY SELECT company_member_return, company_member_info_return;
+END;
+$$ LANGUAGE plpgsql;
