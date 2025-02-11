@@ -136,6 +136,50 @@ CREATE TABLE IF NOT EXISTS company_job_checkpoint
     FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS house
+(
+    id               SERIAL PRIMARY KEY,
+    owner_id         INT                 NOT NULL,
+    name             VARCHAR(100) UNIQUE NULL,
+    price_multiplier float4              NOT NULL DEFAULT 1.0,
+    pickup_x         float4              NOT NULL,
+    pickup_y         float4              NOT NULL,
+    pickup_z         float4              NOT NULL,
+    entrance_x       float4              NOT NULL,
+    entrance_y       float4              NOT NULL,
+    entrance_z       float4              NOT NULL,
+    garage           BOOLEAN             NOT NULL DEFAULT false,
+    garage_slot      INT                 NULL,
+    FOREIGN KEY (owner_id) REFERENCES player (id) ON DELETE SET NULL ON UPDATE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS vehicle
+(
+    id       SERIAL PRIMARY KEY,
+    model    INT NOT NULL,
+    owner_id INT NOT NULl,
+    FOREIGN KEY (owner_id) REFERENCES player (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS house_interior
+(
+    id          SERIAL PRIMARY KEY,
+    house_id    INT NOT NULL,
+    interior_id INT NOT NULL,
+    FOREIGN KEY (house_id) REFERENCES house (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE (house_id, interior_id)
+);
+
+CREATE TABLE IF NOT EXISTS house_slot
+(
+    id         SERIAL PRIMARY KEY,
+    house_id   INT NOT NULL,
+    vehicle_id INT NOT NULL,
+    FOREIGN KEY (house_id) REFERENCES house (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicle (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Functions
 CREATE OR REPLACE FUNCTION update_or_create_player_job(pid INT, jid INT, sc INT)
     RETURNS player_job AS
 $$
