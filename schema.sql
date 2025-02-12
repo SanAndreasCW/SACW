@@ -158,6 +158,22 @@ CREATE TABLE IF NOT EXISTS vehicle
     id       SERIAL PRIMARY KEY,
     model    INT NOT NULL,
     owner_id INT NOT NULl,
+    spoiler INT NULL,
+    hood INT NULL,
+    roof INT NULL,
+    sideskirt INT NULL,
+    exhaust INT NULl,
+    wheel INT NULL,
+    lamp INT NULL,
+    nitro INT NULL,
+    stereo INT NULL,
+    hydraulics INT NULL,
+    bullbar INT NULL,
+    rear_bullbar INT NULL,
+    front_bullbar INT NULL,
+    front_bumper INT NULL,
+    rear_bumper INT NULL,
+    vent INT NULL,
     FOREIGN KEY (owner_id) REFERENCES player (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
